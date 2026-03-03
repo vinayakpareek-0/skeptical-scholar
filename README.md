@@ -1,5 +1,5 @@
 # Skeptical Scholar: 
-`Adversarially-Robust Neuro-Symbolic RAG with Epistemic Uncertainty for Scientific Literature`
+`Robust Neuro-Symbolic RAG with Uncertainty Estimation for Scientific Literature`
 
 A multi-layered document intelligence system that combines hybrid retrieval (BM25 + dense + cross-encoder), dynamic knowledge graph construction with multi-hop symbolic reasoning, and calibrated generation with NLI-based entailment verification. Implements selective prediction through three-layer epistemic uncertainty quantification.
 
@@ -18,4 +18,4 @@ A multi-layered document intelligence system that combines hybrid retrieval (BM2
 
 
 
-### `Work in progress...`
+> #### `Work in progress..`
