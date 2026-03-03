@@ -1,0 +1,30 @@
+project:
+  name: "skeptical-scholar"
+  seed: 42
+
+data:
+  raw: "data/raw"
+  processed: "data/processed"
+  metadata: "data/metadata"
+  db: "data/db"
+  graph: "data/graph"
+
+arxiv:
+  base_url: "https://arxiv.org/abs/"
+  queries:
+  - "retrieval augmented generation"
+  - "transformer attention mechanism"
+  papers: 500
+  max_results: 5
+  download_delay: 5
+  download_path: "data/raw/arxiv_papers"
+
+chunking:
+  min_length: 50
+  max_length: 500
+  overlap: 50
+
+database:
+  path: "data/db/arxiv.db"
+  table_name: "arxiv_papers"
+
