@@ -1,7 +1,7 @@
 import re
 from pathlib import Path
 from typing import List, Dict
-import fitz  # PyMuPDF
+import fitz 
 import sys 
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -43,7 +43,7 @@ SECTION_HEADERS = [
 ]
 
 # Build dynamic regex pattern
-HEADER_PATTERN = r"\n\s*(?:\d+\.?\s*)?(" + "|".join(SECTION_HEADERS) + r")\s*\n"
+HEADER_PATTERN = r"(?:\n|^)\s*(?:\d+\.?\s*)?(" + "|".join(SECTION_HEADERS) + r")\s*\n"
 
 
 def detect_sections(full_text: str) -> List[Dict]:
@@ -98,14 +98,13 @@ def parse_paper(pdf_path: str, paper_id: str) -> Dict:
 
 
 if __name__ == "__main__":
-    # Pick one PDF manually for testing
     test_pdf = Path(PROJECT_ROOT / "data/raw/arxiv_papers").glob("*.pdf")
     test_pdf = list(test_pdf)
 
     if not test_pdf:
         print("No PDFs found in data/raw/arxiv_papers/")
     else:
-        pdf_path = str(test_pdf[3])
+        pdf_path = str(test_pdf[0])
         paper_id = Path(pdf_path).stem
 
         result = parse_paper(pdf_path, paper_id)
