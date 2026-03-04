@@ -1,16 +1,3 @@
-"""
-1. Load config
-2. Fetch papers from ArXiv (arxiv_fetcher.fetch_all)
-3. Load metadata checkpoint (list of paper dicts)
-4. For each paper:
-   a. Parse PDF → sections (pdf_parser.parse_paper)
-   b. Chunk sections (chunker.chunk_paper)
-   c. Insert paper metadata into SQLite (database.insert_papers)
-   d. Insert chunks into SQLite (database.insert_chunks)
-5. Build citation graph from all parsed papers (citation_parser.build_citation_graph)
-6. Save graph to data/graph/citation_graph.json
-7. Print summary stats.
-"""
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))

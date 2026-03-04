@@ -12,8 +12,13 @@ data:
 arxiv:
   base_url: "https://arxiv.org/abs/"
   queries:
-    - "retrieval augmented generation"
-    - "transformer attention mechanism"
+    - "retrieval augmented generation LLM"
+    - "knowledge graph question answering"
+    - "dense passage retrieval"
+    - "natural language inference fact verification"
+    - "uncertainty calibration language models"
+    - "adversarial robustness NLP"
+    - "multi-hop reasoning question answering"
   papers: 500
   max_results: 5
   download_delay: 5
