@@ -51,6 +51,7 @@ def init_db(db_path:str):
     )
     """)
     db.commit()
+    return db
 
 def insert_papers(conn:sqlite3.Connection , papers:List[Dict]):
     cursor = conn.cursor()
