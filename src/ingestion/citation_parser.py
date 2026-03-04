@@ -64,19 +64,19 @@ def extract_references(references_text: str) -> List[str]:
 
         title = None
 
-        # 1: Quoted title (IEEE style)
+        # Quoted title (IEEE style)
         # "Title of the paper," or "Title of the paper."
         quoted = re.search(r'["\u201c](.*?)["\u201d]', entry)
         if quoted and len(quoted.group(1)) > 10:
             title = quoted.group(1).rstrip('.,;')
 
-        # 2: APA style — Author (YEAR). Title. Journal
+        # APA style -  Author (YEAR). Title. Journal
         if not title:
             apa = re.search(r'\(\d{4}[a-z]?\)\.\s*(.*?)(?:\.\s+[A-Z]|\.\s*$)', entry)
             if apa and len(apa.group(1)) > 10:
                 title = apa.group(1).rstrip('.')
 
-        # 3: Author et al. Title. Venue/Journal, YEAR
+        # Author et al. Title. Venue/Journal, YEAR
         # Look for text between first period-space and next period
         if not title:
             # Skip author block (ends with period), then grab title (ends with period)
@@ -87,13 +87,13 @@ def extract_references(references_text: str) -> List[str]:
             if after_author and len(after_author.group(1)) > 10:
                 title = after_author.group(1).rstrip('.,;')
 
-        # 4: After "et al." or comma-separated authors, grab next sentence
+        # After "et al." or comma-separated authors, grab next sentence
         if not title:
             et_al = re.search(r'et al\.\s*(.*?)\.', entry)
             if et_al and len(et_al.group(1)) > 10:
                 title = et_al.group(1).strip()
 
-        # 5: Fallback — longest meaningful segment between periods
+        # Fallback — longest meaningful segment between periods
         if not title:
             segments = [s.strip() for s in entry.split('.') if len(s.strip()) > 15]
             # Skip first segment (likely authors) if there are multiple
@@ -109,13 +109,9 @@ def extract_references(references_text: str) -> List[str]:
             if comma_count >= 3:
                 continue
             titles.append(title)
-            
-        
-
 
         if len(titles) >= 150:
             break
-        
 
     return titles
 
@@ -123,7 +119,6 @@ def build_citation_graph(papers:list[dict])-> nx.DiGraph:
     """
     Builds a citation graph where keys are paper IDs and values are lists of cited paper IDs.
     """
-
     graph = nx.DiGraph()
 
     for paper in papers:
@@ -143,6 +138,8 @@ def save_graph(graph:nx.DiGraph, path:str):
     """
     Saves the citation graph to a file.
     """
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
     data = nx.node_link_data(graph)
     with open(path, "w") as f:
         json.dump(data, f, indent=2)
@@ -159,9 +156,6 @@ def load_graph(path:str)->nx.DiGraph:
     
     print(f"Loaded graph with {loaded_graph.number_of_nodes()} nodes and {loaded_graph.number_of_edges()} edges")
     return loaded_graph
-
-    
-    
 
 if __name__ == "__main__":
     pdf_path = "data/raw/arxiv_papers/2603.02208v1.pdf" # use PROJECT_ROOT
