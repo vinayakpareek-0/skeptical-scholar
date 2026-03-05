@@ -5,6 +5,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from config import load_config , PROJECT_ROOT
 from ingestion.pdf_parser import parse_paper
 from pathlib import Path
+import re
 
 
 def chunk_section(section_text:str , max_tokens :int , overlap:int )-> List[str]:
@@ -12,12 +13,23 @@ def chunk_section(section_text:str , max_tokens :int , overlap:int )-> List[str]
             raise ValueError("Overlap cannot be greater than or equal to max_tokens")
     
     chunks =[]
-    i=0
-    words = section_text.split()
-    while i<len(words):
-        chunk =" ".join(words[i:i+max_tokens])
-        chunks.append(chunk)
-        i+=(max_tokens-overlap)
+    sentences = re.split(r'(?<=[.!?])\s+', section_text)
+    current_chunk = []
+    current_word_count = 0
+    for sentence in sentences:
+        words = len(sentence.split())
+        if current_word_count + words > max_tokens and current_chunk:
+            # Save this chunk, start new one with overlap
+            chunks.append(" ".join(current_chunk))
+            overlap_text = " ".join(current_chunk[-2:])  # last 2 sentences as overlap
+            current_chunk = [overlap_text, sentence]
+            current_word_count = len(overlap_text.split()) + words
+        else:
+            current_chunk.append(sentence)
+            current_word_count += words
+    if current_chunk:
+        chunks.append(" ".join(current_chunk))
+        
     return chunks
 
 
@@ -43,7 +55,7 @@ if __name__== "__main__":
     max_tokens = config["chunking"]["max_length"]
     overlap = config["chunking"]["overlap"]
     
-    pdf_path = "data/raw/arxiv_papers/2603.02202v1.pdf"
+    pdf_path = "data/raw/arxiv_papers/2206.03003v2.pdf"
     paper = parse_paper(pdf_path , paper_id=Path(pdf_path).stem)
     chunks = chunk_paper(paper , max_tokens , overlap)
 
