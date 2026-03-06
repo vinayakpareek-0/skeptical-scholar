@@ -13,6 +13,7 @@ arxiv:
   base_url: "https://arxiv.org/abs/"
   queries:
     - "retrieval augmented generation LLM"
+    - "transformer architecture attention mechanism"
     - "knowledge graph question answering"
     - "dense passage retrieval"
     - "natural language inference fact verification"
@@ -34,7 +35,12 @@ database:
   path: "data/db/arxiv.db"
   table_name: "arxiv_papers"
 
+# retrieval
+
 dense:
   model_name: "BAAI/bge-large-en-v1.5"
   index_path: "data/processed/dense_index.index"
   model_path: "data/processed/dense_model"
+
+retrieval:
+  reranker_name: "cross-encoder/ms-marco-MiniLM-L-6-v2"
