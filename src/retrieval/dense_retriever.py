@@ -45,7 +45,11 @@ def save_index(index , path):
     print(f"Index saved to {path}")
 
 def load_index(path):
-    return faiss.read_index(path)
+    return faiss.read_index(str(path))
+
+def load_dense_model(model_name:str):
+    model = SentenceTransformer(model_name)
+    return model
 
 if __name__== "__main__":
     config = load_config()
