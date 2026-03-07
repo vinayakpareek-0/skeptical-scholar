@@ -2,3 +2,12 @@ arxiv
 PyMuPDF
 pyyaml
 networkx
+rank-bm25
+sentence-transformers
+faiss-cpu
+numpy 
+torch
+tqdm 
+transformers
+huggingface-hub
+scikit-learn
