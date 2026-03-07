@@ -54,6 +54,6 @@ def run_hybrid_retrieval(query , top_k=20):
 
 if __name__ == "__main__":
     query = "What is the role of attention mechanism in transformers?"
-    results = run_hybrid_retrieval(query)
+    results = run_hybrid_retrieval(query , top_k=5)
     for result in results[:5]:
         print(result,"\t")

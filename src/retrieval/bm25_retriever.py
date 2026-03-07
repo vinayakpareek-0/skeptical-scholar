@@ -13,7 +13,7 @@ def build_bm25_index(chunks:list[dict])-> tuple[BM25Okapi , list[dict]]:
     bm25 = BM25Okapi(tokenized_chunks)
     return bm25, chunks
 
-def search_bm25(index , query :str , chunks:list[dict] , top_k:int = 3)-> list[dict]:
+def search_bm25(index , query :str , chunks:list[dict] , top_k:int = 10)-> list[dict]:
     tokenized_query= query.lower().split()
     scores = index.get_scores(tokenized_query)
     top_k_indices = np.argsort(scores)[::-1][:top_k]
@@ -27,9 +27,8 @@ if __name__=="__main__":
     chunks = load_chunks(conn)
     bm25, chunks = build_bm25_index(chunks)
     query = "What is the role of attention mechanism in transformers?"
-    results = search_bm25(bm25, query, chunks, top_k=10)
+    results = search_bm25(bm25, query, chunks, top_k=5)
     for result in results:
-        print(result["text"])
-        print("............................")
+        print(result["text"][:200])
         print(result["score"])
         print("\t")

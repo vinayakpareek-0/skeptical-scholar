@@ -58,7 +58,7 @@ if __name__== "__main__":
     index , model , chunks = build_dense_index(chunks , config["dense"]["model_name"])
     save_index(index , PROJECT_ROOT / config["dense"]["index_path"])
     query = "What is the role of attention mechanism in transformers?"
-    results = search_dense(index , model , query , chunks , top_k=10)
+    results = search_dense(index , model , query , chunks , top_k=5)
     for result in results: 
         print(result["text"])
         print(result["score"])
