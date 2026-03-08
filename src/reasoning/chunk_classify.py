@@ -9,7 +9,6 @@ def classify_chunk_heuristic(chunk):
     text = chunk["text"].lower()
     section = chunk.get("section", "").lower()
     
-    # key words
     method_kw = ["we propose", "our method", "we introduce", "our approach", "our model", 
                  "we design", "we present", "architecture", "framework", "pipeline"]
     result_kw = ["accuracy", "outperforms", "achieves", "table", "figure", "f1", 
@@ -19,7 +18,6 @@ def classify_chunk_heuristic(chunk):
     claim_kw = ["we argue", "hypothesize", "we believe", "conjecture", "we expect",
                 "we claim", "in this paper", "we show that", "contribution"]
     
-    # count
     scores = {
         "method": sum(1 for kw in method_kw if kw in text),
         "result": sum(1 for kw in result_kw if kw in text),
@@ -48,7 +46,7 @@ def classify_chunk_zeroshot(classifier, chunk):
     return result["labels"][0]
 
 
-def classify_chunks(chunks, method="heuristic", classifier=None):
+def classify_chunks(chunks:list[dict], method="heuristic", classifier=None):
     for chunk in chunks:
         if method == "zeroshot" and classifier:
             chunk["chunk_type"] = classify_chunk_zeroshot(classifier, chunk)
