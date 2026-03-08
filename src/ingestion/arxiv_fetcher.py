@@ -12,8 +12,7 @@ from config import load_config , PROJECT_ROOT
 
 
 def fetch_arxiv_papers(query: str, max_results: int) -> List[Dict]:
-    client = arxiv.Client(delay_seconds=2, num_retries=3)
-
+    client = arxiv.Client(delay_seconds=5, num_retries=5) 
     search = arxiv.Search(
         query=query,
         max_results=max_results,
@@ -83,6 +82,7 @@ def run_pipeline():
     all_metadata =existing_metadata.copy()
     for query in queries:
         papers = fetch_arxiv_papers(query, max_results)
+        time.sleep(10)  
         for paper in papers:
             if paper["arxiv_id"] in existing_ids:
                 print(f"Skipping (already exists): {paper['arxiv_id']}")

@@ -12,19 +12,35 @@ data:
 arxiv:
   base_url: "https://arxiv.org/abs/"
   queries:
-    - "retrieval augmented generation LLM"
-    - "transformer architecture attention mechanism"
-    - "knowledge graph question answering"
-    - "dense passage retrieval"
-    - "natural language inference fact verification"
-    - "uncertainty calibration language models"
-    - "adversarial robustness NLP"
-    - "multi-hop reasoning question answering"
-  papers: 500
-  max_results: 5
-  download_delay: 5
+    # Core RAG & Retrieval
+    - "retrieval augmented generation hallucination detection"
+    - "dense passage retrieval evaluation benchmark"
+    - "cross encoder reranking information retrieval"
+    # NLP & Verification
+    - "fact verification natural language inference scientific"
+    - "contradiction detection NLI scientific claims"
+    - "text summarization abstractive extractive"
+    - "named entity recognition zero shot"
+    # Uncertainty & Calibration
+    - "selective prediction abstention neural networks"
+    - "calibrated confidence estimation language models"
+    - "out of distribution detection deep learning"
+    # Reasoning & QA
+    - "knowledge grounded question answering"
+    - "multi-hop reasoning question answering knowledge graph"
+    - "chain of thought reasoning large language models"
+    # Architecture & Models
+    - "transformer attention mechanism self-attention"
+    - "vision transformer robustness adversarial"
+    - "graph neural network node classification"
+    # Broader ML
+    - "contrastive learning self-supervised representation"
+    - "federated learning privacy preserving"
+    - "reinforcement learning from human feedback RLHF"
+    - "fairness bias mitigation machine learning"
+  max_results: 10
+  download_delay: 10
   download_path: "data/raw/arxiv_papers"
-  pdf_path: "data/raw/arxiv_papers/2603.02200v1.pdf"
 
 chunking:
   min_length: 50
@@ -45,3 +61,14 @@ dense:
 retrieval:
   reranker_name: "cross-encoder/ms-marco-MiniLM-L-6-v2"
   idk_threshold: -2.0
+
+semantic_scholar:
+  enabled: true
+  queries:
+    - "retrieval augmented generation"
+    - "fact verification NLI"
+    - "uncertainty quantification language models"
+    - "adversarial robustness NLP"
+    - "multi-hop question answering"
+  max_results: 20
+  min_citations: 10
