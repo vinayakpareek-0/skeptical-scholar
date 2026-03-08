@@ -10,7 +10,7 @@ from retrieval.hybrid_retriever import run_hybrid_retrieval
 from retrieval.reranker import load_reranker, rerank
 from retrieval.idk_trigger import check_retrieval_confidence
 
-
+# have to add more args for this later
 def run_rag(query):
     config = load_config()
     reranker = load_reranker(config["retrieval"]["reranker_name"])
@@ -23,7 +23,6 @@ def run_rag(query):
     if idk["triggered"]:
         print(f"[IDK] {idk['reason']}")
         return None
-
     return results
 
 

@@ -42,7 +42,7 @@ def run_hybrid_retrieval(query , top_k=20):
     Single function runs entire retrieval logic
     Args: Query , top_k  (good for single call)
 
-    # optim later ,might be slow for repeated calls , due to init_db again and again
+    - optim later, might be slow for repeated calls , due to init_db again and again
     """
     config = load_config()
     conn = init_db(PROJECT_ROOT / config["database"]["path"])

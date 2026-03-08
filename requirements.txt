@@ -11,3 +11,4 @@ tqdm
 transformers
 huggingface-hub
 scikit-learn
+gliner
