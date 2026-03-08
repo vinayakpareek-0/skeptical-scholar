@@ -9,7 +9,7 @@ from reasoning.confidence_score import compute_confidence
 
 def check_reasoning_confidence(confidence, contradictions, chunk_types):
     # Low confidence score
-    if confidence["score"] < 0.4:
+    if confidence["score"] < 0.1:
         return {
             "triggered": True,
             "reason": f"Low reasoning confidence ({confidence['score']:.3f})",
