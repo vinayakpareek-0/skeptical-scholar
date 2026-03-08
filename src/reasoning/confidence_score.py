@@ -36,7 +36,7 @@ def compute_confidence(chunks, contradictions):
     }
 
 if __name__=="__main__":
-    chunks =  run_rag("vision transformer robustness")
+    chunks = run_rag("LLMs are just matrix multiplication in backend")
     if not chunks:
         print("No results")
         sys.exit()
