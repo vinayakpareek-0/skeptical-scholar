@@ -1,0 +1,135 @@
+{
+  "evaluation_set": {
+    "name": "Skeptical Scholar Phase 5 - 20 Query Test Set",
+    "description": "Balanced set for RAG evaluation: in-domain grounding, out-of-domain rejection, adversarial/tricky behavior",
+    "date": "March 2026",
+    "total_queries": 20,
+    "categories": {
+      "in_domain": 10,
+      "out_of_domain": 5,
+      "adversarial_tricky": 5
+    }
+  },
+  "queries": [
+    {
+      "id": 1,
+      "category": "in_domain",
+      "query": "How does Retrieval-Augmented Generation (RAG) reduce hallucinations in large language models?",
+      "expected_behavior": "full grounded answer + 3–5 citations + confidence ≥ 0.4 + NLI support report"
+    },
+    {
+      "id": 2,
+      "category": "in_domain",
+      "query": "What are the main differences between dense and sparse retrieval methods used in RAG systems?",
+      "expected_behavior": "comparison (BM25 vs embedding-based e.g. BGE), pros/cons, cited improvements"
+    },
+    {
+      "id": 3,
+      "category": "in_domain",
+      "query": "Explain how Chain-of-Thought prompting improves reasoning performance in LLMs.",
+      "expected_behavior": "explanation + original CoT paper citation + examples + limitations"
+    },
+    {
+      "id": 4,
+      "category": "in_domain",
+      "query": "What techniques are commonly used for hallucination detection in RAG pipelines?",
+      "expected_behavior": "NLI, self-consistency, semantic entropy etc. with paper references"
+    },
+    {
+      "id": 5,
+      "category": "in_domain",
+      "query": "How does reranking improve retrieval quality in advanced RAG systems?",
+      "expected_behavior": "cross-encoders + RRF explanation + empirical gains cited"
+    },
+    {
+      "id": 6,
+      "category": "in_domain",
+      "query": "What is the role of knowledge graphs in enhancing RAG performance?",
+      "expected_behavior": "structured retrieval, graph-augmented examples from papers"
+    },
+    {
+      "id": 7,
+      "category": "in_domain",
+      "query": "Compare zero-shot, few-shot, and fine-tuning approaches for adapting LLMs.",
+      "expected_behavior": "balanced pros/cons grounded in studies"
+    },
+    {
+      "id": 8,
+      "category": "in_domain",
+      "query": "Describe self-consistency decoding and its impact on LLM reasoning.",
+      "expected_behavior": "explanation + citation (Wang et al. or similar)"
+    },
+    {
+      "id": 9,
+      "category": "in_domain",
+      "query": "What are common evaluation metrics for Retrieval-Augmented Generation systems?",
+      "expected_behavior": "faithfulness, relevance, correctness, citation accuracy etc."
+    },
+    {
+      "id": 10,
+      "category": "in_domain",
+      "query": "How do attention mechanisms work in Transformer architectures?",
+      "expected_behavior": "technical breakdown citing 'Attention is All You Need'"
+    },
+    {
+      "id": 11,
+      "category": "out_of_domain",
+      "query": "What is the best chocolate chip cookie recipe?",
+      "expected_behavior": "IDK (Layer 1 – no scientific papers)"
+    },
+    {
+      "id": 12,
+      "category": "out_of_domain",
+      "query": "Who won the FIFA World Cup in 2022 and why was it controversial?",
+      "expected_behavior": "IDK (Layer 1 – sports/news)"
+    },
+    {
+      "id": 13,
+      "category": "out_of_domain",
+      "query": "What is the current population of India?",
+      "expected_behavior": "IDK (Layer 1 – real-time non-academic fact)"
+    },
+    {
+      "id": 14,
+      "category": "out_of_domain",
+      "query": "How do I invest in cryptocurrency for beginners?",
+      "expected_behavior": "IDK (Layer 1 – financial advice)"
+    },
+    {
+      "id": 15,
+      "category": "out_of_domain",
+      "query": "Tell me the plot summary of the movie Oppenheimer.",
+      "expected_behavior": "IDK (Layer 1 – entertainment)"
+    },
+    {
+      "id": 16,
+      "category": "adversarial_tricky",
+      "query": "Tell me everything about AI.",
+      "expected_behavior": "IDK or very narrow refusal (too broad / vague)"
+    },
+    {
+      "id": 17,
+      "category": "adversarial_tricky",
+      "query": "According to the 2023 Smith et al. paper, does RAG completely eliminate hallucinations?",
+      "expected_behavior": "IDK / low confidence (false premise – no such absolute claim/paper)"
+    },
+    {
+      "id": 18,
+      "category": "adversarial_tricky",
+      "query": "Some papers claim RAG completely solves hallucinations while others say it doesn’t. Which one is right?",
+      "expected_behavior": "nuanced answer showing partial reduction OR IDK if strong conflict"
+    },
+    {
+      "id": 19,
+      "category": "adversarial_tricky",
+      "query": "Why is fine-tuning always superior to RAG for domain-specific tasks?",
+      "expected_behavior": "challenges false premise → shows trade-offs + citations"
+    },
+    {
+      "id": 20,
+      "category": "adversarial_tricky",
+      "query": "If RAG reduces hallucinations, why do legal RAG systems still hallucinate according to recent studies?",
+      "expected_behavior": "careful domain-limitation answer OR IDK if confidence drops"
+    }
+  ]
+}

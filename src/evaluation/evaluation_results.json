@@ -1,0 +1,202 @@
+[
+  {
+    "id": 1,
+    "query": "How does Retrieval-Augmented Generation (RAG) redu",
+    "category": "in_domain",
+    "bm25_top": 26.54,
+    "dense_top": 0.839,
+    "hybrid_top": 0.03175,
+    "rerank_top": 7.702,
+    "idk_triggered": false
+  },
+  {
+    "id": 2,
+    "query": "What are the main differences between dense and sp",
+    "category": "in_domain",
+    "bm25_top": 38.255,
+    "dense_top": 0.757,
+    "hybrid_top": 0.02895,
+    "rerank_top": 4.744,
+    "idk_triggered": false
+  },
+  {
+    "id": 3,
+    "query": "Explain how Chain-of-Thought prompting improves re",
+    "category": "in_domain",
+    "bm25_top": 21.123,
+    "dense_top": 0.86,
+    "hybrid_top": 0.03252,
+    "rerank_top": 7.364,
+    "idk_triggered": false
+  },
+  {
+    "id": 4,
+    "query": "What techniques are commonly used for hallucinatio",
+    "category": "in_domain",
+    "bm25_top": 31.837,
+    "dense_top": 0.694,
+    "hybrid_top": 0.03089,
+    "rerank_top": 3.505,
+    "idk_triggered": false
+  },
+  {
+    "id": 5,
+    "query": "How does reranking improve retrieval quality in ad",
+    "category": "in_domain",
+    "bm25_top": 23.026,
+    "dense_top": 0.813,
+    "hybrid_top": 0.01639,
+    "rerank_top": 4.343,
+    "idk_triggered": false
+  },
+  {
+    "id": 6,
+    "query": "What is the role of knowledge graphs in enhancing ",
+    "category": "in_domain",
+    "bm25_top": 36.505,
+    "dense_top": 0.803,
+    "hybrid_top": 0.03279,
+    "rerank_top": 5.248,
+    "idk_triggered": false
+  },
+  {
+    "id": 7,
+    "query": "Compare zero-shot, few-shot, and fine-tuning appro",
+    "category": "in_domain",
+    "bm25_top": 25.605,
+    "dense_top": 0.773,
+    "hybrid_top": 0.01639,
+    "rerank_top": 4.826,
+    "idk_triggered": false
+  },
+  {
+    "id": 8,
+    "query": "Describe self-consistency decoding and its impact ",
+    "category": "in_domain",
+    "bm25_top": 24.864,
+    "dense_top": 0.784,
+    "hybrid_top": 0.03252,
+    "rerank_top": 2.795,
+    "idk_triggered": false
+  },
+  {
+    "id": 9,
+    "query": "What are common evaluation metrics for Retrieval-A",
+    "category": "in_domain",
+    "bm25_top": 24.865,
+    "dense_top": 0.84,
+    "hybrid_top": 0.01639,
+    "rerank_top": 5.187,
+    "idk_triggered": false
+  },
+  {
+    "id": 10,
+    "query": "How do attention mechanisms work in Transformer ar",
+    "category": "in_domain",
+    "bm25_top": 22.561,
+    "dense_top": 0.786,
+    "hybrid_top": 0.03252,
+    "rerank_top": 4.582,
+    "idk_triggered": false
+  },
+  {
+    "id": 11,
+    "query": "What is the best chocolate chip cookie recipe?",
+    "category": "out_of_domain",
+    "bm25_top": 23.949,
+    "dense_top": 0.505,
+    "hybrid_top": 0.01639,
+    "rerank_top": -10.942,
+    "idk_triggered": true
+  },
+  {
+    "id": 12,
+    "query": "Who won the FIFA World Cup in 2022 and why was it ",
+    "category": "out_of_domain",
+    "bm25_top": 35.044,
+    "dense_top": 0.526,
+    "hybrid_top": 0.03227,
+    "rerank_top": -9.486,
+    "idk_triggered": true
+  },
+  {
+    "id": 13,
+    "query": "What is the current population of India?",
+    "category": "out_of_domain",
+    "bm25_top": 25.527,
+    "dense_top": 0.592,
+    "hybrid_top": 0.01639,
+    "rerank_top": -7.175,
+    "idk_triggered": true
+  },
+  {
+    "id": 14,
+    "query": "How do I invest in cryptocurrency for beginners?",
+    "category": "out_of_domain",
+    "bm25_top": 23.122,
+    "dense_top": 0.558,
+    "hybrid_top": 0.01639,
+    "rerank_top": -9.484,
+    "idk_triggered": true
+  },
+  {
+    "id": 15,
+    "query": "Tell me the plot summary of the movie Oppenheimer.",
+    "category": "out_of_domain",
+    "bm25_top": 31.634,
+    "dense_top": 0.704,
+    "hybrid_top": 0.03083,
+    "rerank_top": -0.415,
+    "idk_triggered": true
+  },
+  {
+    "id": 16,
+    "query": "Tell me everything about AI.",
+    "category": "adversarial_tricky",
+    "bm25_top": 20.611,
+    "dense_top": 0.654,
+    "hybrid_top": 0.01639,
+    "rerank_top": -2.447,
+    "idk_triggered": true
+  },
+  {
+    "id": 17,
+    "query": "According to the 2023 Smith et al. paper, does RAG",
+    "category": "adversarial_tricky",
+    "bm25_top": 27.544,
+    "dense_top": 0.639,
+    "hybrid_top": 0.01639,
+    "rerank_top": 2.262,
+    "idk_triggered": false
+  },
+  {
+    "id": 18,
+    "query": "Some papers claim RAG completely solves hallucinat",
+    "category": "adversarial_tricky",
+    "bm25_top": 30.729,
+    "dense_top": 0.65,
+    "hybrid_top": 0.01639,
+    "rerank_top": -2.011,
+    "idk_triggered": true
+  },
+  {
+    "id": 19,
+    "query": "Why is fine-tuning always superior to RAG for doma",
+    "category": "adversarial_tricky",
+    "bm25_top": 30.545,
+    "dense_top": 0.724,
+    "hybrid_top": 0.03008,
+    "rerank_top": 3.084,
+    "idk_triggered": false
+  },
+  {
+    "id": 20,
+    "query": "If RAG reduces hallucinations, why do legal RAG sy",
+    "category": "adversarial_tricky",
+    "bm25_top": 32.999,
+    "dense_top": 0.651,
+    "hybrid_top": 0.02986,
+    "rerank_top": 1.754,
+    "idk_triggered": false
+  }
+]

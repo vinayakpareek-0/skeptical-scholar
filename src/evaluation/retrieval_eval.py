@@ -1,3 +1,4 @@
+import json
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -11,44 +12,12 @@ from retrieval.reranker import load_reranker, rerank
 from retrieval.idk_trigger import check_retrieval_confidence
 
 
-test_queries = [
-    # In-domain
-    {"query": "attention mechanism in transformers", "domain": "in"},
-    {"query": "vision transformer adversarial robustness", "domain": "in"},
-    {"query": "self-attention computation complexity", "domain": "in"},
-    {"query": "how positional encoding works in transformers", "domain": "in"},
-    {"query": "why transformers use multi-head attention", "domain": "in"},
-    {"query": "quadratic complexity problem in transformers", "domain": "in"},
-    {"query": "vision transformer patch embedding process", "domain": "in"},
-    {"query": "role of layer normalization in transformers", "domain": "in"},
-    {"query": "transformer architecture for image classification", "domain": "in"},
-    {"query": "how transformer models handle long dependencies", "domain": "in"},
-
-    # Borderline
-    {"query": "bert vs transformer architecture differences", "domain": "border"},
-    {"query": "large language model training pipeline", "domain": "border"},
-    {"query": "comparison of cnn and vision transformers", "domain": "border"},
-    {"query": "how retrieval augmented generation works", "domain": "border"},
-    {"query": "fine tuning transformer models for classification", "domain": "border"},
-
-    # Out-of-domain
-    {"query": "best pizza recipe", "domain": "out"},
-    {"query": "how to train a dog", "domain": "out"},
-    {"query": "stock market prediction 2025", "domain": "out"},
-    {"query": "how to grow tomatoes at home", "domain": "out"},
-    {"query": "best travel destinations in europe", "domain": "out"},
-    {"query": "symptoms of vitamin d deficiency", "domain": "out"},
-    {"query": "how to build a gaming pc", "domain": "out"},
-    {"query": "history of the roman empire", "domain": "out"},
-    {"query": "how to cook pasta alfredo", "domain": "out"},
-    {"query": "tips for public speaking confidence", "domain": "out"},
-]
+def load_evaluation_set(path):
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
 
 
 def run_evaluation():
-    """
-    More of "Wiring" than evaluation, can be called lite phase-2 wrapper
-    """
     config = load_config()
     conn = init_db(PROJECT_ROOT / config["database"]["path"])
     chunks = load_chunks(conn)
@@ -57,38 +26,35 @@ def run_evaluation():
     dense_index = load_dense_index(PROJECT_ROOT / config["dense"]["index_path"])
     dense_model = load_dense_model(config["dense"]["model_name"])
     reranker = load_reranker(config["retrieval"]["reranker_name"])
-
     threshold = config["retrieval"]["idk_threshold"]
 
-    # Collect results per method
+    eval_path = os.path.join(os.path.dirname(__file__), "evaluation.json")
+    eval_set = load_evaluation_set(eval_path)
+
     results_table = []
 
-    for item in test_queries:
-        query = item["query"]
-        domain = item["domain"]
+    for q in eval_set["queries"]:
+        query = q["query"]
+        category = q["category"]
 
-        # BM25
         bm25_results = search_bm25(bm25_index, query, chunks, top_k=5)
         bm25_top = bm25_results[0]["score"] if bm25_results else 0
 
-        # Dense
         dense_results = search_dense(dense_index, dense_model, query, chunks, top_k=5)
         dense_top = dense_results[0]["score"] if dense_results else 0
 
-        # Hybrid
         hybrid_results = search_hybrid(query, bm25_index, dense_index, dense_model, chunks, top_k=20)
         hybrid_top = hybrid_results[0]["score"] if hybrid_results else 0
 
-        # Hybrid + Rerank
         reranked = rerank(reranker, query, hybrid_results, top_k=5)
         rerank_top = reranked[0]["rerank_score"] if reranked else 0
 
-        # IDK check
         idk = check_retrieval_confidence(reranked, threshold=threshold)
 
         results_table.append({
-            "query": query,
-            "domain": domain,
+            "id": q["id"],
+            "query": query[:50],
+            "category": category,
             "bm25_top": round(bm25_top, 3),
             "dense_top": round(dense_top, 3),
             "hybrid_top": round(hybrid_top, 5),
@@ -96,34 +62,37 @@ def run_evaluation():
             "idk_triggered": idk["triggered"],
         })
 
-    # Print results
-    print(f"{'Query':<50} {'Domain':<8} {'BM25':>8} {'Dense':>8} {'Hybrid':>10} {'Rerank':>8} {'IDK':>6}")
-    
+    print(f"{'ID':>3} {'Query':<50} {'Cat':<12} {'BM25':>8} {'Dense':>8} {'Hybrid':>10} {'Rerank':>8} {'IDK':>5}")
+    print("-" * 110)
+
     for r in results_table:
         idk_str = "YES" if r["idk_triggered"] else "no"
-        print(f"{r['query']:<50} {r['domain']:<8} {r['bm25_top']:>8} {r['dense_top']:>8} {r['hybrid_top']:>10} {r['rerank_top']:>8} {idk_str:>6}")
+        print(f"{r['id']:>3} {r['query']:<50} {r['category']:<12} {r['bm25_top']:>8} {r['dense_top']:>8} {r['hybrid_top']:>10} {r['rerank_top']:>8} {idk_str:>5}")
 
-    # Summary stats
-    in_domain = [r for r in results_table if r["domain"] == "in"]
-    border = [r for r in results_table if r["domain"] == "border"]
-    out_domain = [r for r in results_table if r["domain"] == "out"]
+    in_domain = [r for r in results_table if r["category"] == "in_domain"]
+    out_domain = [r for r in results_table if r["category"] == "out_of_domain"]
+    adversarial = [r for r in results_table if r["category"] == "adversarial_tricky"]
 
     print("\nSUMMARY")
-
     if in_domain:
-        avg_rerank_in = sum(r["rerank_top"] for r in in_domain) / len(in_domain)
-        idk_false_triggers = sum(1 for r in in_domain if r["idk_triggered"])
-        print(f"In-domain  ({len(in_domain)} queries): Avg rerank score = {avg_rerank_in:.3f}, False IDK triggers = {idk_false_triggers}")
-
-    if border:
-        avg_rerank_border = sum(r["rerank_top"] for r in border) / len(border)
-        print(f"Borderline ({len(border)} queries): Avg rerank score = {avg_rerank_border:.3f}")
+        avg = sum(r["rerank_top"] for r in in_domain) / len(in_domain)
+        false_idk = sum(1 for r in in_domain if r["idk_triggered"])
+        print(f"In-domain    ({len(in_domain)}): Avg rerank = {avg:.3f}, False IDK = {false_idk}")
 
     if out_domain:
-        avg_rerank_out = sum(r["rerank_top"] for r in out_domain) / len(out_domain)
-        idk_correct = sum(1 for r in out_domain if r["idk_triggered"])
-        idk_accuracy = (idk_correct / len(out_domain)) * 100
-        print(f"Out-domain ({len(out_domain)} queries): Avg rerank score = {avg_rerank_out:.3f}, IDK accuracy = {idk_accuracy:.1f}%")
+        avg = sum(r["rerank_top"] for r in out_domain) / len(out_domain)
+        correct_idk = sum(1 for r in out_domain if r["idk_triggered"])
+        print(f"Out-of-domain({len(out_domain)}): Avg rerank = {avg:.3f}, IDK accuracy = {correct_idk}/{len(out_domain)}")
+
+    if adversarial:
+        avg = sum(r["rerank_top"] for r in adversarial) / len(adversarial)
+        idk_count = sum(1 for r in adversarial if r["idk_triggered"])
+        print(f"Adversarial  ({len(adversarial)}): Avg rerank = {avg:.3f}, IDK triggered = {idk_count}/{len(adversarial)}")
+
+    out_path = os.path.join(os.path.dirname(__file__), "evaluation_results.json")
+    with open(out_path, "w") as f:
+        json.dump(results_table, f, indent=2)
+    print(f"\nResults saved to {out_path}")
 
 
 if __name__ == "__main__":
