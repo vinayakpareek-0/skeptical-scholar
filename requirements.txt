@@ -12,3 +12,5 @@ transformers
 huggingface-hub
 scikit-learn
 gliner
+groq
+python-dotenv

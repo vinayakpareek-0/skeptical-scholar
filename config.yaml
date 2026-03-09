@@ -38,6 +38,7 @@ arxiv:
     - "federated learning privacy preserving"
     - "reinforcement learning from human feedback RLHF"
     - "fairness bias mitigation machine learning"
+
   max_results: 10
   download_delay: 10
   download_path: "data/raw/arxiv_papers"
@@ -72,3 +73,8 @@ semantic_scholar:
     - "multi-hop question answering"
   max_results: 20
   min_citations: 10
+
+generation:
+  model: "llama-3.1-8b-instant"
+  temperature: 0.3
+  max_tokens: 512
