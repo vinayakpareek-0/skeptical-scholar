@@ -78,3 +78,34 @@ generation:
   model: "llama-3.1-8b-instant"
   temperature: 0.3
   max_tokens: 512
+  chunk_text_limit: 300
+  confidence_labels:
+    high: 0.7
+    moderate: 0.4
+
+nli:
+  model_name: "cross-encoder/nli-deberta-v3-base"
+  contradiction_threshold: 0.7
+  reliability_threshold: 0.3
+
+entity:
+  model_name: "urchade/gliner_medium-v2.1"
+  labels:
+    - "model"
+    - "dataset"
+    - "metric"
+    - "task"
+    - "method"
+  threshold: 0.3
+
+idk:
+  confidence_threshold: 0.1
+  min_answer_words: 15
+  hedge_count: 2
+
+confidence:
+  weights:
+    retrieval: 0.3
+    evidence_ratio: 0.3
+    entity_overlap: 0.2
+    contradiction_penalty: 0.2

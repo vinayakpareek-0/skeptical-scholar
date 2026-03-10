@@ -1,14 +1,19 @@
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),"..")))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from config import load_config
 from retrieval.run_rag import run_rag
 from reasoning.chunk_classify import classify_chunks
 from reasoning.entity_extract import load_extractor, extract_from_chunks
-from reasoning.contradiction_detect import load_nli_model , detect_contradictions
+from reasoning.contradiction_detect import load_nli_model, detect_contradictions
+
 
 def compute_confidence(chunks, contradictions):
+    config = load_config()
+    w = config["confidence"]["weights"]
+
     scores = [c.get("rerank_score", 0) for c in chunks]
-    retrieval = max(0, min(1, (max(scores) + 10) / 20))  # normalize
+    retrieval = max(0, min(1, (max(scores) + 10) / 20))
     
     types = [c.get("chunk_type", "background") for c in chunks]
     evidence_ratio = sum(1 for t in types if t in ["evidence", "result"]) / max(len(types), 1)
@@ -22,7 +27,7 @@ def compute_confidence(chunks, contradictions):
     total_pairs = max(len(chunks) * (len(chunks) - 1) / 2, 1)
     contra_penalty = len(contradictions) / total_pairs
     
-    score = (0.3 * retrieval) + (0.3 * evidence_ratio) + (0.2 * shared) - (0.2 * contra_penalty)
+    score = (w["retrieval"] * retrieval) + (w["evidence_ratio"] * evidence_ratio) + (w["entity_overlap"] * shared) - (w["contradiction_penalty"] * contra_penalty)
     score = max(0.0, min(1.0, score))
     
     return {
@@ -35,16 +40,16 @@ def compute_confidence(chunks, contradictions):
         }
     }
 
-if __name__=="__main__":
+if __name__ == "__main__":
     chunks = run_rag("LLMs are just matrix multiplication in backend")
     if not chunks:
         print("No results")
         sys.exit()
     chunks = classify_chunks(chunks, method="heuristic")
     model = load_extractor()
-    chunks = extract_from_chunks(model , chunks)
+    chunks = extract_from_chunks(model, chunks)
     nli = load_nli_model()
-    contd = detect_contradictions(nli , chunks)
-    confidence= compute_confidence(chunks, contd)
+    contd = detect_contradictions(nli, chunks)
+    confidence = compute_confidence(chunks, contd)
     print(f"Score: {confidence['score']}")
     print(f"Breakdown: {confidence['breakdown']}")
