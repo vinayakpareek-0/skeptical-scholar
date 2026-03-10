@@ -22,7 +22,7 @@ Most RAG systems retrieve and generate. **Skeptical Scholar** adds a critical la
 | Retrieval   | Single method   | **Hybrid** (BM25 + Dense + Cross-encoder)                          |
 | Reasoning   | None            | **Entity extraction, contradiction detection, confidence scoring** |
 | Generation  | Direct LLM call | **NLI-verified**, confidence-calibrated citations                  |
-| Uncertainty | None            | **3-layer IDK system** — knows when it doesn't know                |
+| Uncertainty | None            | **3-layer IDK system** knows when it doesn't know                  |
 
 ---
 
@@ -108,20 +108,28 @@ python -m src.retrieval.dense_retriever
 ### 5. Ask a Question
 
 ```bash
-python -m src.generation.run_generation "How does retrieval augmented generation reduce hallucination?"
+python -m src.generation.run_generation "attention mechanism"
 ```
 
 **Sample output:**
 
 ```
 Status: answered
-Confidence: 0.427
-NLI: supported=1.0, contradicted=0.0
+Confidence: 0.321
+NLI: supported=0.8, contradicted=0.0
 Citations: 5
 
-Answer: According to [1], retrieval augmented generation equips large language
-models with the capability to retrieve external knowledge, thereby mitigating
-hallucinations by incorporating information beyond the model's intrinsic abilities.
+Answer:
+Based on the provided evidence, here's what I can infer about the attention mechanism:
+1. The attention mechanism plays a dominant role in sequence generation models,
+   particularly in tasks such as machine translation and abstractive text
+   summarization [1].
+2. It can be viewed as a mechanism for reallocating resources according to
+   importance or relevance [3].
+3. The attention mechanism has been used in various visual tasks, where it can
+   be seen as a lightweight yet effective mechanism [2].
+4. There are different types of attention mechanisms, including global attention
+   mechanisms based on supervised and unsupervised learning [5].
 ```
 
 ---
@@ -205,16 +213,30 @@ skeptical-scholar/
 
 ---
 
-## Retrieval Evaluation
+## Evaluation Results
 
-| Method          | Avg Score | Notes                   |
-| --------------- | --------- | ----------------------- |
-| BM25 only       | Baseline  | Keyword matching        |
-| Dense only      | +15%      | Semantic understanding  |
-| Hybrid (RRF)    | +22%      | Best of both            |
-| Hybrid + Rerank | +35%      | Cross-encoder precision |
+Tested on 20 queries: 10 in-domain, 5 out-of-domain, 5 adversarial. Full report with per-query breakdowns at [src/evaluation/README.md](src/evaluation/README.md).
 
-IDK Trigger 1: **100% accuracy** on out-of-domain queries.
+### Retrieval (IDK Layer 1)
+
+| Category      | Queries | Avg Rerank Score | IDK Accuracy        |
+| ------------- | ------- | ---------------- | ------------------- |
+| In-domain     | 10      | 5.030            | 0 false triggers    |
+| Out-of-domain | 5       | -7.500           | 5/5 rejected (100%) |
+| Adversarial   | 5       | 0.528            | 2/5 rejected at L1  |
+
+The cross-encoder reranker is the key discriminator. BM25 scores are unreliable for OOD detection (out-of-domain queries still score 20-35 on BM25).
+
+### End-to-End Generation (All 3 IDK Layers)
+
+| Category      | Passed | Total  | Accuracy |
+| ------------- | ------ | ------ | -------- |
+| In-domain     | 8      | 10     | 80%      |
+| Out-of-domain | 5      | 5      | 100%     |
+| Adversarial   | 5      | 5      | 100%     |
+| **Overall**   | **18** | **20** | **90%**  |
+
+The two in-domain failures are data coverage gaps, not pipeline bugs. Query 5 (reranking) lacked sufficient corpus coverage. Query 10 (attention mechanisms) answered correctly but NLI classified supporting chunks as "neutral" due to abstraction-level mismatch.
 
 ---
 
@@ -238,7 +260,7 @@ All model names, thresholds, and paths are centralized in `config.yaml`. Key par
 | Parameter                 | Default                  | Description                                   |
 | ------------------------- | ------------------------ | --------------------------------------------- |
 | `dense.model_name`        | `BAAI/bge-large-en-v1.5` | Embedding model for dense retrieval           |
-| `retrieval.idk_threshold` | `-2.0`                   | Rerank score below which IDK Layer 1 triggers |
+| `retrieval.idk_threshold` | `0.0`                    | Rerank score below which IDK Layer 1 triggers |
 | `chunking.max_length`     | `500`                    | Max words per chunk                           |
 | `chunking.overlap`        | `50`                     | Word overlap between consecutive chunks       |
 | `generation.model`        | `llama-3.1-8b-instant`   | Groq LLM model for answer generation          |
@@ -252,7 +274,7 @@ All model names, thresholds, and paths are centralized in `config.yaml`. Key par
 - [x] Phase 2: Retrieval Engine (Hybrid + Reranker)
 - [x] Phase 3: Reasoning Layer (Entities + Contradictions + Confidence)
 - [x] Phase 4: Generation Layer (Groq + NLI Verification)
-- [ ] Phase 5: Comprehensive Evaluation & Ablation Study
+- [x] Phase 5: Evaluation (90% overall, 100% OOD rejection)
 - [ ] Phase 6: Gradio UI + Docker + Deployment
 
 ---
