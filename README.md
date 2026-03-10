@@ -2,20 +2,27 @@
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Live Demo](https://img.shields.io/badge/HuggingFace-Live%20Demo-yellow.svg)](https://huggingface.co/spaces/Vinayak-0/skeptical-scholar)
 
 **Robust Neuro-Symbolic RAG with Uncertainty Estimation for Scientific Literature**
 
 A multi-layered document intelligence system that retrieves, reasons over, and generates answers from ArXiv research papers, with built-in hallucination detection and confidence-calibrated citations.
 
+Try it: [huggingface.co/spaces/Vinayak-0/skeptical-scholar](https://huggingface.co/spaces/Vinayak-0/skeptical-scholar)
+
+---
+
 ## Motivation
 
-Large language models hallucinate. Standard RAG pipelines reduce this by grounding answers in retrieved documents, but they treat retrieval as a black box, if the retrieved chunks are contradictory, irrelevant, or insufficiently supported, the LLM still generates a confident-sounding answer. Skeptical Scholar addresses this by adding a reasoning layer that evaluates evidence quality _before_ generation, and a verification layer that checks factual consistency _after_ generation. The system refuses to answer when evidence is insufficient rather than guessing.
+Large language models hallucinate. Standard RAG pipelines reduce this by grounding answers in retrieved documents, but they treat retrieval as a black box. If the retrieved chunks are contradictory, irrelevant, or insufficiently supported, the LLM still generates a confident-sounding answer.
+
+Skeptical Scholar addresses this by adding a reasoning layer that evaluates evidence quality _before_ generation, and a verification layer that checks factual consistency _after_ generation. The system refuses to answer when evidence is insufficient rather than guessing.
 
 ---
 
 ## What Makes This Different?
 
-Most RAG systems retrieve and generate. **Skeptical Scholar** adds a critical layer between them: **reasoning + verification**.
+Most RAG systems retrieve and generate. Skeptical Scholar adds a critical layer between them: reasoning + verification.
 
 | Feature     | Typical RAG     | Skeptical Scholar                                                  |
 | ----------- | --------------- | ------------------------------------------------------------------ |
@@ -30,39 +37,39 @@ Most RAG systems retrieve and generate. **Skeptical Scholar** adds a critical la
 
 ```
 Query
-  │
-  ▼
-┌─────────────────────────────────────┐
-│  RETRIEVAL ENGINE                   │
-│  BM25 ──┐                          │
-│         ├── Reciprocal Rank Fusion  │
-│  Dense ─┘    (Hybrid Merge)        │
-│         │                          │
-│  Cross-Encoder Reranker            │
-│         │                          │
-│  IDK Trigger 1 (low relevance)     │
-└─────────┬───────────────────────────┘
-          │
-          ▼
-┌─────────────────────────────────────┐
-│  REASONING LAYER                    │
-│  Chunk Classifier (claim/evidence)  │
-│  GLiNER Entity Extraction           │
-│  NLI Contradiction Detection        │
-│  Multi-Signal Confidence Scoring    │
-│  IDK Trigger 2 (weak evidence)     │
-└─────────┬───────────────────────────┘
-          │
-          ▼
-┌─────────────────────────────────────┐
-│  GENERATION LAYER                   │
-│  Evidence-Grounded Prompt Building  │
-│  Groq LLM (Llama 3.1)              │
-│  DeBERTa NLI Answer Verification   │
-│  IDK Trigger 3 (hallucination)     │
-└─────────┬───────────────────────────┘
-          │
-          ▼
+  |
+  v
++-----------------------------------------+
+|  RETRIEVAL ENGINE                       |
+|  BM25 ---+                              |
+|          +--- Reciprocal Rank Fusion    |
+|  Dense --+    (Hybrid Merge)            |
+|          |                              |
+|  Cross-Encoder Reranker                 |
+|          |                              |
+|  IDK Trigger 1 (low relevance)         |
++----------+------------------------------+
+           |
+           v
++-----------------------------------------+
+|  REASONING LAYER                        |
+|  Chunk Classifier (claim/evidence)      |
+|  GLiNER Entity Extraction               |
+|  NLI Contradiction Detection            |
+|  Multi-Signal Confidence Scoring        |
+|  IDK Trigger 2 (weak evidence)         |
++----------+------------------------------+
+           |
+           v
++-----------------------------------------+
+|  GENERATION LAYER                       |
+|  Evidence-Grounded Prompt Building      |
+|  Groq LLM (Llama 3.1)                  |
+|  DeBERTa NLI Answer Verification       |
+|  IDK Trigger 3 (hallucination)         |
++----------+------------------------------+
+           |
+           v
    Verified Answer with Citations
    + Confidence Score + NLI Report
 ```
@@ -71,7 +78,7 @@ Query
 
 ## Quick Start
 
-### 1. Clone & Install
+### 1. Clone and Install
 
 ```bash
 git clone https://github.com/vinayakpareek-0/skeptical-scholar.git
@@ -132,11 +139,73 @@ Based on the provided evidence, here's what I can infer about the attention mech
    mechanisms based on supervised and unsupervised learning [5].
 ```
 
+### 6. Launch the Chat UI
+
+```bash
+python app.py
+```
+
+Opens a Gradio chat interface at `http://localhost:7860`. Ask multiple questions in a single session.
+
+---
+
+## Improving Performance
+
+The system ships with ~100 papers. The more domain-relevant papers you ingest, the better the answers.
+
+**Add more papers** by editing `config.yaml`:
+
+```yaml
+arxiv:
+  queries:
+    - "your new topic here"
+    - "another topic"
+  max_results: 20 # increase from 10
+
+semantic_scholar:
+  max_results: 40 # increase from 20
+  min_citations: 5 # lower to include more papers
+```
+
+Then re-run ingestion and rebuild the index:
+
+```bash
+python -m src.ingestion.run_pipeline
+python -m src.retrieval.dense_retriever
+```
+
+**Tune retrieval sensitivity** -- if the system triggers IDK too aggressively on valid queries, lower the threshold. If it answers questions it should refuse, raise it:
+
+```yaml
+retrieval:
+  idk_threshold: 0.0 # lower = more permissive, higher = stricter
+```
+
+**Tune generation** -- adjust the LLM parameters:
+
+```yaml
+generation:
+  model: "llama-3.1-8b-instant"
+  temperature: 0.3 # lower = more deterministic
+  max_tokens: 512 # increase for longer answers
+```
+
+**Tune confidence scoring** -- adjust how much each signal contributes:
+
+```yaml
+confidence:
+  weights:
+    retrieval: 0.3
+    evidence_ratio: 0.3
+    entity_overlap: 0.2
+    contradiction_penalty: 0.2
+```
+
 ---
 
 ## Three-Layer IDK System
 
-The system knows when it **doesn't know** — a critical feature for trustworthy AI:
+The system knows when it doesn't know. This is a critical feature for trustworthy AI.
 
 | Layer                  | Trigger                                            | What It Catches             |
 | ---------------------- | -------------------------------------------------- | --------------------------- |
@@ -150,6 +219,7 @@ The system knows when it **doesn't know** — a critical feature for trustworthy
 
 ```
 skeptical-scholar/
+├── app.py                       # Gradio chat UI
 ├── config.yaml                  # All model names, paths, thresholds
 ├── requirements.txt
 ├── .env                         # GROQ_API_KEY (not committed)
@@ -157,8 +227,8 @@ skeptical-scholar/
 ├── src/
 │   ├── ingestion/               # Phase 1: Data Pipeline
 │   │   ├── arxiv_fetcher.py     # ArXiv paper fetching with checkpoints
-│   │   ├── semantic_scholar_fetcher.py  # High-citation paper fetching
-│   │   ├── pdf_parser.py        # PDF → sections with PyMuPDF
+│   │   ├── semantic_scholar_fetcher.py
+│   │   ├── pdf_parser.py        # PDF to sections with PyMuPDF
 │   │   ├── chunker.py           # Section-aware chunking
 │   │   ├── database.py          # SQLite document store
 │   │   ├── citation_parser.py   # Citation graph builder
@@ -175,7 +245,7 @@ skeptical-scholar/
 │   ├── reasoning/               # Phase 3: Reasoning Layer
 │   │   ├── chunk_classify.py    # Heuristic + zero-shot classification
 │   │   ├── entity_extract.py    # GLiNER entity extraction
-│   │   ├── contradiction_detect.py  # NLI contradiction detection
+│   │   ├── contradiction_detect.py
 │   │   ├── confidence_score.py  # Multi-signal confidence fusion
 │   │   ├── idk_trigger_2.py     # IDK Layer 2
 │   │   └── run_reasoning.py     # Reasoning pipeline
@@ -188,7 +258,10 @@ skeptical-scholar/
 │   │   └── run_generation.py    # Full generation pipeline
 │   │
 │   └── evaluation/              # Phase 5: Evaluation
-│       └── retrieval_eval.py    # Retrieval ablation study
+│       ├── retrieval_eval.py    # Retrieval ablation study
+│       ├── generation_eval.py   # End-to-end generation eval
+│       ├── evaluation.json      # 20-query test set
+│       └── README.md            # Detailed evaluation report
 │
 └── data/
     ├── db/arxiv.db              # SQLite document store
@@ -210,6 +283,7 @@ skeptical-scholar/
 | **Contradiction Detection** | DeBERTa NLI (cross-encoder)                      |
 | **Generation**              | Groq API (Llama 3.1 8B)                          |
 | **Answer Verification**     | DeBERTa NLI entailment checking                  |
+| **UI**                      | Gradio                                           |
 
 ---
 
@@ -236,7 +310,7 @@ The cross-encoder reranker is the key discriminator. BM25 scores are unreliable 
 | Adversarial   | 5      | 5      | 100%     |
 | **Overall**   | **18** | **20** | **90%**  |
 
-The two in-domain failures are data coverage gaps, not pipeline bugs. Query 5 (reranking) lacked sufficient corpus coverage. Query 10 (attention mechanisms) answered correctly but NLI classified supporting chunks as "neutral" due to abstraction-level mismatch.
+The two in-domain failures are data coverage gaps, not pipeline bugs. Both would improve with a larger corpus.
 
 ---
 
@@ -244,9 +318,9 @@ The two in-domain failures are data coverage gaps, not pipeline bugs. Query 5 (r
 
 The system ingests papers from ArXiv and Semantic Scholar into a local SQLite database. After processing:
 
-- **Papers table** - stores paper metadata: arxiv_id, title, authors, abstract, publication date, PDF URL
-- **Chunks table** - stores text segments with fields: `chunk_id`, `paper_id`, `section` (e.g. Introduction, Methods), `text`, `word_count`
-- **Dense index** - FAISS flat inner-product index over BGE-large-en-v1.5 embeddings (1024-dim), with a `chunk_ids.npy` file mapping vector positions to chunk IDs
+- **Papers table** - paper metadata: arxiv_id, title, authors, abstract, publication date, PDF URL
+- **Chunks table** - text segments with fields: `chunk_id`, `paper_id`, `section` (e.g. Introduction, Methods), `text`, `word_count`
+- **Dense index** - FAISS flat inner-product index over BGE-large-en-v1.5 embeddings (1024-dim), with a `chunk_ids.npy` mapping vector positions to chunk IDs
 - **Citation graph** - NetworkX directed graph stored as JSON, mapping paper titles to cited titles
 
 Chunks are created with section-aware splitting: max 500 words, 50-word overlap, minimum 50 words. Each chunk retains its source paper and section for citation tracing.
@@ -255,7 +329,7 @@ Chunks are created with section-aware splitting: max 500 words, 50-word overlap,
 
 ## Configuration
 
-All model names, thresholds, and paths are centralized in `config.yaml`. Key parameters you can tune:
+All model names, thresholds, and paths are centralized in `config.yaml`. Zero hardcoded values in source code.
 
 | Parameter                 | Default                  | Description                                   |
 | ------------------------- | ------------------------ | --------------------------------------------- |
@@ -265,6 +339,8 @@ All model names, thresholds, and paths are centralized in `config.yaml`. Key par
 | `chunking.overlap`        | `50`                     | Word overlap between consecutive chunks       |
 | `generation.model`        | `llama-3.1-8b-instant`   | Groq LLM model for answer generation          |
 | `generation.temperature`  | `0.3`                    | LLM sampling temperature                      |
+| `nli.model_name`          | `nli-deberta-v3-base`    | NLI model for contradiction and verification  |
+| `entity.model_name`       | `gliner_medium-v2.1`     | GLiNER model for entity extraction            |
 
 ---
 
@@ -275,7 +351,7 @@ All model names, thresholds, and paths are centralized in `config.yaml`. Key par
 - [x] Phase 3: Reasoning Layer (Entities + Contradictions + Confidence)
 - [x] Phase 4: Generation Layer (Groq + NLI Verification)
 - [x] Phase 5: Evaluation (90% overall, 100% OOD rejection)
-- [ ] Phase 6: Gradio UI + Docker + Deployment
+- [x] Phase 6: Gradio UI + HuggingFace Spaces Deployment
 
 ---
 
