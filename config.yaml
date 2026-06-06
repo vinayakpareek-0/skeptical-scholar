@@ -59,15 +59,18 @@ database:
 # retrieval
 
 dense:
-  model_name: "BAAI/bge-large-en-v1.5"
+  model_name: "sentence-transformers/all-MiniLM-L6-v2"
+  query_prefix: ""
   index_path: "data/processed/dense_index.index"
   model_path: "data/processed/dense_model"
 
 retrieval:
   reranker_name: "cross-encoder/ms-marco-MiniLM-L-6-v2"
+  enable_reranker: false
   idk_threshold: 0.0
   candidate_top_k: 10
   rerank_top_k: 3
+  dense_idk_threshold: 0.25
 
 semantic_scholar:
   enabled: true

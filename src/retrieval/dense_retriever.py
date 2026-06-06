@@ -20,13 +20,17 @@ def build_dense_index(chunks:list[dict] , model_name:str):
     return index , model , chunks
 
 def search_dense(index , model , query , chunks , top_k=10):
-    query = "Represent this sentence for searching relevant passages: " + query
+    config = load_config()
+    query_prefix = config.get("dense", {}).get(
+        "query_prefix",
+        "Represent this sentence for searching relevant passages: "
+    )
+    query = f"{query_prefix}{query}"
     query_embedding = model.encode([query], normalize_embeddings=True).astype('float32')
     scores , indexes = index.search(query_embedding , top_k)
     
     chunk_map = {c["chunk_id"]: c for c in chunks}
     
-    config = load_config()
     ids_path = PROJECT_ROOT / "data" / "processed" / "chunk_ids.npy"
     if ids_path.exists():
         saved_ids = np.load(str(ids_path), allow_pickle=True)

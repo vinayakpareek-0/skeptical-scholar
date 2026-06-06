@@ -324,6 +324,7 @@
 
       <div class="status">
         <div class="status-row"><span>Backend</span><strong id="backendStatus">checking</strong></div>
+        <div class="status-row"><span>Warmup</span><strong id="warmupStatus">checking</strong></div>
         <div class="status-row"><span>Last run</span><strong id="lastLatency">-</strong></div>
         <div class="status-row"><span>Mode</span><strong>fast demo</strong></div>
       </div>
@@ -359,6 +360,7 @@
     const input = document.querySelector("#queryInput");
     const submitButton = document.querySelector("#submitButton");
     const backendStatus = document.querySelector("#backendStatus");
+    const warmupStatus = document.querySelector("#warmupStatus");
     const busyText = document.querySelector("#busyText");
     const lastLatency = document.querySelector("#lastLatency");
 
@@ -413,6 +415,29 @@
       busyText.textContent = isBusy ? "running" : "ready";
     }
 
+    function setWarmupState(status, elapsed) {
+      if (status === "ready") {
+        warmupStatus.textContent = `${elapsed.toFixed(1)}s`;
+        if (!submitButton.dataset.queryRunning) {
+          input.disabled = false;
+          submitButton.disabled = false;
+          busyText.textContent = "ready";
+        }
+        return;
+      }
+
+      if (status === "warming" || status === "cold") {
+        warmupStatus.textContent = `${status} ${elapsed.toFixed(1)}s`;
+        input.disabled = true;
+        submitButton.disabled = true;
+        busyText.textContent = "warming";
+        return;
+      }
+
+      warmupStatus.textContent = status;
+      busyText.textContent = status;
+    }
+
     async function checkHealth() {
       try {
         const response = await fetch(`${apiBase}/api/health`);
@@ -422,8 +447,19 @@
       }
     }
 
+    async function checkStatus() {
+      try {
+        const response = await fetch(`${apiBase}/api/status`);
+        const status = await response.json();
+        setWarmupState(status.status, Number(status.elapsed || 0));
+      } catch {
+        warmupStatus.textContent = "unknown";
+      }
+    }
+
     async function ask(query) {
       addMessage("user", query);
+      submitButton.dataset.queryRunning = "true";
       setBusy(true);
       const startedAt = performance.now();
 
@@ -466,7 +502,9 @@
           meta: [{ label: "Backend unavailable", warn: true }]
         });
       } finally {
+        delete submitButton.dataset.queryRunning;
         setBusy(false);
+        checkStatus();
         input.focus();
       }
     }
@@ -494,6 +532,8 @@
     });
 
     checkHealth();
+    checkStatus();
+    setInterval(checkStatus, 2000);
     input.focus();
   </script>
 </body>

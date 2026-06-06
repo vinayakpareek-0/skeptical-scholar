@@ -86,3 +86,32 @@ def clear_runtime_cache():
         get_llm_client,
     ):
         cached_fn.cache_clear()
+
+
+def warm_runtime():
+    config = get_config()
+    get_chunks()
+    get_bm25_index()
+    get_dense_index()
+
+    dense_model = get_dense_model()
+    dense_model.encode(["warmup"], normalize_embeddings=True)
+
+    retrieval_cfg = config.get("retrieval", {})
+    reasoning_cfg = config.get("reasoning", {})
+    generation_cfg = config.get("generation", {})
+
+    if retrieval_cfg.get("enable_reranker", True):
+        reranker = get_reranker()
+        reranker.predict([["warmup query", "warmup passage"]])
+
+    if reasoning_cfg.get("enable_entities", True):
+        get_entity_extractor()
+
+    if (
+        reasoning_cfg.get("enable_contradictions", True)
+        or generation_cfg.get("verify_answer", True)
+    ):
+        get_nli_model()
+
+    get_llm_client()

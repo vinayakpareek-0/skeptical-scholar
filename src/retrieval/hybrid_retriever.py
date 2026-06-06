@@ -23,12 +23,14 @@ def reciprocal_rank_fusion(bm25_results, dense_results, k=60):
         if cid not in scores:
             scores[cid] = {"data": result, "score": 0}
         scores[cid]["score"] += 1 / (k + rank)
+        scores[cid]["data"]["bm25_score"] = result["score"]
     
     for rank, result in enumerate(dense_results, start=1):
         cid = result["chunk_id"]
         if cid not in scores:
             scores[cid] = {"data": result, "score": 0}
         scores[cid]["score"] += 1 / (k + rank)
+        scores[cid]["data"]["dense_score"] = result["score"]
     
     merged = sorted(scores.values(), key=lambda x: x["score"], reverse=True)
     return [{**item["data"], "score": item["score"]} for item in merged]
