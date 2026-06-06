@@ -8,10 +8,26 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from reasoning.run_reasoning import run_reasoning
 from generation.llm_client import generate
-from generation.prompts import build_prompt, build_idk_prompt
+from generation.fallbacks import (
+    greeting_response,
+    is_basic_ai_ml_query,
+    is_greeting,
+    should_answer_without_retrieval,
+)
+from generation.prompts import build_general_ai_prompt, build_prompt, build_idk_prompt
 from generation.nli_verifier import verify_answer
 from generation.idk_trigger3 import check_generation_confidence
 from runtime_cache import get_config, get_llm_client, get_nli_model
+
+
+def skipped_nli_result():
+    return {
+        "supported": 0,
+        "contradicted": 0,
+        "neutral": 0,
+        "is_reliable": True,
+        "skipped": True
+    }
 
 
 def run_generation(query):
@@ -19,11 +35,89 @@ def run_generation(query):
     config = get_config()
     timings = {}
 
+    if is_greeting(query):
+        timings["total"] = round(perf_counter() - started_at, 3)
+        return {
+            "status": "answered",
+            "answer": greeting_response(),
+            "confidence": {
+                "score": 1.0,
+                "breakdown": {
+                    "retrieval": 0,
+                    "evidence_ratio": 0,
+                    "entity_overlap": 0,
+                    "contradiction_penalty": 0
+                }
+            },
+            "nli": skipped_nli_result(),
+            "citations": [],
+            "entities": [],
+            "contradictions": [],
+            "timings": timings
+        }
+
+    if should_answer_without_retrieval(query):
+        llm_started_at = perf_counter()
+        client = get_llm_client()
+        prompt = build_general_ai_prompt(
+            query,
+            "This is a short background question, so the system answered directly without waiting for paper retrieval."
+        )
+        answer = generate(client, prompt)
+        timings["llm"] = round(perf_counter() - llm_started_at, 3)
+        timings["total"] = round(perf_counter() - started_at, 3)
+        return {
+            "status": "answered",
+            "answer": answer,
+            "confidence": {
+                "score": 0.2,
+                "breakdown": {
+                    "retrieval": 0,
+                    "evidence_ratio": 0,
+                    "entity_overlap": 0,
+                    "contradiction_penalty": 0
+                }
+            },
+            "nli": skipped_nli_result(),
+            "citations": [],
+            "entities": [],
+            "contradictions": [],
+            "timings": timings,
+            "fallback": "general_ai_background"
+        }
+
     reasoning_started_at = perf_counter()
     reasoning = run_reasoning(query)
     timings["reasoning"] = round(perf_counter() - reasoning_started_at, 3)
 
     if reasoning["status"] == "idk":
+        if is_basic_ai_ml_query(query):
+            llm_started_at = perf_counter()
+            client = get_llm_client()
+            prompt = build_general_ai_prompt(query, reasoning["reason"])
+            answer = generate(client, prompt)
+            timings["llm"] = round(perf_counter() - llm_started_at, 3)
+            timings["total"] = round(perf_counter() - started_at, 3)
+            return {
+                "status": "answered",
+                "answer": answer,
+                "confidence": {
+                    "score": 0.2,
+                    "breakdown": {
+                        "retrieval": 0,
+                        "evidence_ratio": 0,
+                        "entity_overlap": 0,
+                        "contradiction_penalty": 0
+                    }
+                },
+                "nli": skipped_nli_result(),
+                "citations": [],
+                "entities": [],
+                "contradictions": [],
+                "timings": timings,
+                "fallback": "general_ai_background"
+            }
+
         explanation = None
         if config.get("runtime", {}).get("explain_idk_with_llm", True):
             llm_started_at = perf_counter()
@@ -63,13 +157,7 @@ def run_generation(query):
                 "timings": timings
             }
     else:
-        nli_result = {
-            "supported": 0,
-            "contradicted": 0,
-            "neutral": 0,
-            "is_reliable": True,
-            "skipped": True
-        }
+        nli_result = skipped_nli_result()
         idk3 = check_generation_confidence(answer, nli_result)
         if idk3["triggered"]:
             timings["total"] = round(perf_counter() - started_at, 3)

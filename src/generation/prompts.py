@@ -31,3 +31,14 @@ Reason: {reason}
 Question: {query}
 Provide a brief explanation of why this question cannot be answered with the available corpus.
 """
+
+def build_general_ai_prompt(query, reason):
+    return f"""You are a scientific research assistant.
+The local paper retrieval step did not find strong enough evidence for citations.
+Reason: {reason}
+
+Question: {query}
+
+Give a concise general AI/ML background answer. Do not invent paper citations. Do not claim the answer is grounded in retrieved papers. If useful, end with one sentence saying that stronger paper-backed detail would require ingesting or retrieving relevant papers for this topic.
+Answer:
+"""
