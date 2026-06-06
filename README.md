@@ -17,6 +17,17 @@ Given a question, the system:
 
 The answer includes citations to the retrieved paper chunks. If retrieval or reasoning confidence is too weak, the system returns an "I don't know" response instead of forcing an answer.
 
+## Architecture
+
+![Skeptical Scholar architecture](docs/architecture.svg)
+
+The project has two main flows:
+
+1. **Answer-time flow:** `app.py` or `ui_server.py` accepts a question, calls `src/generation/run_generation.py`, and then moves through reasoning, hybrid retrieval, reranking, confidence checks, prompt construction, Groq generation, citations, and optional NLI verification.
+2. **Corpus-ingestion flow:** `src/ingestion/query_ingest.py` fetches papers from ArXiv and optionally Semantic Scholar, parses PDFs, chunks text into SQLite, rebuilds the FAISS dense index, and clears runtime caches so later queries can use the new evidence.
+
+Runtime-heavy objects such as chunks, BM25 indexes, FAISS indexes, embedding models, rerankers, NLI models, and the Groq client are loaded through `src/runtime_cache.py`. The custom web UI can warm these components at startup so the first user query is less likely to pay the full model-loading cost.
+
 ## Current Runtime Profile
 
 The default `config.yaml` enables a faster runtime profile:

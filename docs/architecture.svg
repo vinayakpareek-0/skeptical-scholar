@@ -1,0 +1,166 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="880" viewBox="0 0 1200 880" role="img" aria-labelledby="title desc">
+  <title id="title">Skeptical Scholar project architecture</title>
+  <desc id="desc">Architecture diagram showing interfaces, generation, reasoning, retrieval, ingestion, storage, runtime cache, and external services.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#2f3a45"/>
+    </marker>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#1f2937" flood-opacity="0.12"/>
+    </filter>
+    <style>
+      .bg { fill: #f7f8fb; }
+      .title { fill: #17202a; font: 700 30px Arial, Helvetica, sans-serif; }
+      .subtitle { fill: #526070; font: 15px Arial, Helvetica, sans-serif; }
+      .lane-title { fill: #2f3a45; font: 700 15px Arial, Helvetica, sans-serif; letter-spacing: 0.2px; }
+      .box { stroke-width: 1.3; rx: 8; filter: url(#shadow); }
+      .box-title { fill: #17202a; font: 700 15px Arial, Helvetica, sans-serif; }
+      .box-text { fill: #405060; font: 12px Arial, Helvetica, sans-serif; }
+      .note { fill: #607080; font: 12px Arial, Helvetica, sans-serif; }
+      .line { fill: none; stroke: #2f3a45; stroke-width: 2; marker-end: url(#arrow); }
+      .soft-line { fill: none; stroke: #687789; stroke-width: 1.7; stroke-dasharray: 5 5; marker-end: url(#arrow); }
+      .data-line { fill: none; stroke: #476582; stroke-width: 2; marker-end: url(#arrow); }
+      .ingest-line { fill: none; stroke: #79613a; stroke-width: 2; marker-end: url(#arrow); }
+      .label { fill: #405060; font: 12px Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1200" height="880"/>
+  <text class="title" x="48" y="54">Skeptical Scholar Architecture</text>
+  <text class="subtitle" x="48" y="80">Local RAG research assistant with hybrid retrieval, confidence gates, grounded generation, and optional verification.</text>
+
+  <rect x="32" y="112" width="1136" height="122" rx="14" fill="#eef3f8" stroke="#d5dee8"/>
+  <text class="lane-title" x="52" y="140">Interfaces and Deployment</text>
+
+  <rect class="box" x="54" y="160" width="190" height="54" fill="#ffffff" stroke="#b8c7d6"/>
+  <text class="box-title" x="74" y="183">Gradio Chat UI</text>
+  <text class="box-text" x="74" y="202">app.py - local demo</text>
+
+  <rect class="box" x="286" y="160" width="210" height="54" fill="#ffffff" stroke="#b8c7d6"/>
+  <text class="box-title" x="306" y="183">Static Web UI</text>
+  <text class="box-text" x="306" y="202">web/index.html via ui_server.py</text>
+
+  <rect class="box" x="538" y="160" width="210" height="54" fill="#ffffff" stroke="#b8c7d6"/>
+  <text class="box-title" x="558" y="183">Vercel Frontend</text>
+  <text class="box-text" x="558" y="202">static client deployment</text>
+
+  <rect class="box" x="790" y="160" width="170" height="54" fill="#ffffff" stroke="#b8c7d6"/>
+  <text class="box-title" x="810" y="183">HF Space Copy</text>
+  <text class="box-text" x="810" y="202">hf-space backend mirror</text>
+
+  <rect class="box" x="1000" y="160" width="130" height="54" fill="#ffffff" stroke="#b8c7d6"/>
+  <text class="box-title" x="1020" y="183">User Query</text>
+  <text class="box-text" x="1020" y="202">question in</text>
+
+  <rect x="32" y="260" width="1136" height="320" rx="14" fill="#f1f7f2" stroke="#d7e6d9"/>
+  <text class="lane-title" x="52" y="288">Answer-Time Pipeline</text>
+
+  <rect class="box" x="68" y="320" width="180" height="76" fill="#ffffff" stroke="#8ab197"/>
+  <text class="box-title" x="88" y="345">HTTP/API Layer</text>
+  <text class="box-text" x="88" y="365">/api/query validates input</text>
+  <text class="box-text" x="88" y="383">calls run_generation()</text>
+
+  <rect class="box" x="292" y="320" width="190" height="76" fill="#ffffff" stroke="#8ab197"/>
+  <text class="box-title" x="312" y="345">Generation</text>
+  <text class="box-text" x="312" y="365">fallbacks, prompt build</text>
+  <text class="box-text" x="312" y="383">Groq answer + citations</text>
+
+  <rect class="box" x="526" y="320" width="190" height="76" fill="#ffffff" stroke="#8ab197"/>
+  <text class="box-title" x="546" y="345">Reasoning</text>
+  <text class="box-text" x="546" y="365">chunk classification</text>
+  <text class="box-text" x="546" y="383">confidence + IDK layer 2</text>
+
+  <rect class="box" x="760" y="320" width="190" height="76" fill="#ffffff" stroke="#8ab197"/>
+  <text class="box-title" x="780" y="345">Retrieval Orchestrator</text>
+  <text class="box-text" x="780" y="365">run_rag()</text>
+  <text class="box-text" x="780" y="383">rerank + IDK layer 1</text>
+
+  <rect class="box" x="994" y="304" width="126" height="54" fill="#ffffff" stroke="#8ab197"/>
+  <text class="box-title" x="1014" y="327">BM25 Search</text>
+  <text class="box-text" x="1014" y="346">rank-bm25</text>
+
+  <rect class="box" x="994" y="374" width="126" height="54" fill="#ffffff" stroke="#8ab197"/>
+  <text class="box-title" x="1014" y="397">Dense Search</text>
+  <text class="box-text" x="1014" y="416">FAISS + embeddings</text>
+
+  <rect class="box" x="760" y="462" width="190" height="68" fill="#ffffff" stroke="#8ab197"/>
+  <text class="box-title" x="780" y="486">Hybrid Fusion</text>
+  <text class="box-text" x="780" y="506">reciprocal rank fusion</text>
+
+  <rect class="box" x="526" y="462" width="190" height="68" fill="#ffffff" stroke="#8ab197"/>
+  <text class="box-title" x="546" y="486">Optional Checks</text>
+  <text class="box-text" x="546" y="506">entities, contradictions</text>
+
+  <rect class="box" x="292" y="462" width="190" height="68" fill="#ffffff" stroke="#8ab197"/>
+  <text class="box-title" x="312" y="486">Verification Gate</text>
+  <text class="box-text" x="312" y="506">optional NLI + IDK layer 3</text>
+
+  <rect class="box" x="68" y="462" width="180" height="68" fill="#ffffff" stroke="#8ab197"/>
+  <text class="box-title" x="88" y="486">Response</text>
+  <text class="box-text" x="88" y="506">answer, citations, confidence</text>
+
+  <path class="line" d="M1065 214 L1065 244 L158 244 L158 314"/>
+  <path class="line" d="M248 358 L286 358"/>
+  <path class="line" d="M482 358 L520 358"/>
+  <path class="line" d="M716 358 L754 358"/>
+  <path class="line" d="M950 344 L988 333"/>
+  <path class="line" d="M950 374 L988 402"/>
+  <path class="line" d="M1057 428 L1057 496 L956 496"/>
+  <path class="line" d="M760 496 L722 496"/>
+  <path class="line" d="M526 496 L488 496"/>
+  <path class="line" d="M292 496 L254 496"/>
+  <path class="soft-line" d="M387 462 L387 402"/>
+  <path class="soft-line" d="M621 462 L621 402"/>
+
+  <rect x="32" y="606" width="740" height="216" rx="14" fill="#fff7e8" stroke="#eadbbd"/>
+  <text class="lane-title" x="52" y="634">Corpus Ingestion and Index Build</text>
+
+  <rect class="box" x="64" y="666" width="160" height="64" fill="#ffffff" stroke="#c9a85b"/>
+  <text class="box-title" x="84" y="690">Topic Query</text>
+  <text class="box-text" x="84" y="710">query_ingest.py</text>
+
+  <rect class="box" x="260" y="646" width="170" height="64" fill="#ffffff" stroke="#c9a85b"/>
+  <text class="box-title" x="280" y="670">Paper Sources</text>
+  <text class="box-text" x="280" y="690">ArXiv + Semantic Scholar</text>
+
+  <rect class="box" x="260" y="738" width="170" height="54" fill="#ffffff" stroke="#c9a85b"/>
+  <text class="box-title" x="280" y="761">PDF Parsing</text>
+  <text class="box-text" x="280" y="780">parse + chunk papers</text>
+
+  <rect class="box" x="470" y="666" width="160" height="64" fill="#ffffff" stroke="#c9a85b"/>
+  <text class="box-title" x="490" y="690">SQLite Store</text>
+  <text class="box-text" x="490" y="710">papers and chunks</text>
+
+  <rect class="box" x="660" y="666" width="84" height="64" fill="#ffffff" stroke="#c9a85b"/>
+  <text class="box-title" x="680" y="690">FAISS</text>
+  <text class="box-text" x="680" y="710">dense index</text>
+
+  <path class="ingest-line" d="M224 698 L254 678"/>
+  <path class="ingest-line" d="M345 710 L345 732"/>
+  <path class="ingest-line" d="M430 765 L464 712"/>
+  <path class="ingest-line" d="M630 698 L654 698"/>
+
+  <rect x="806" y="606" width="362" height="216" rx="14" fill="#f3eef8" stroke="#dfd2ea"/>
+  <text class="lane-title" x="826" y="634">Shared Runtime and External Services</text>
+
+  <rect class="box" x="838" y="666" width="142" height="64" fill="#ffffff" stroke="#b99bd1"/>
+  <text class="box-title" x="858" y="690">Runtime Cache</text>
+  <text class="box-text" x="858" y="710">models, chunks, indexes</text>
+
+  <rect class="box" x="1014" y="648" width="120" height="54" fill="#ffffff" stroke="#b99bd1"/>
+  <text class="box-title" x="1034" y="671">Groq API</text>
+  <text class="box-text" x="1034" y="690">LLM generation</text>
+
+  <rect class="box" x="1014" y="728" width="120" height="54" fill="#ffffff" stroke="#b99bd1"/>
+  <text class="box-title" x="1034" y="751">Model Hub</text>
+  <text class="box-text" x="1034" y="770">local ML models</text>
+
+  <path class="data-line" d="M550 666 L550 562 L835 562 L835 536"/>
+  <path class="data-line" d="M702 666 L702 548 L855 548 L855 536"/>
+  <path class="data-line" d="M855 462 L855 408"/>
+  <path class="soft-line" d="M909 666 L909 548 L621 548 L621 536"/>
+  <path class="soft-line" d="M980 698 L1008 674"/>
+  <path class="soft-line" d="M980 704 L1008 755"/>
+
+  <text class="note" x="48" y="852">IDK gates protect answer quality at retrieval, reasoning, and generation stages. Fast mode keeps retrieval, reranking, confidence, citations, and generation active while skipping slower optional checks.</text>
+</svg>
