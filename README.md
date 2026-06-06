@@ -81,6 +81,12 @@ python ui_server.py
 
 This serves `web/index.html` and the local API at `http://127.0.0.1:8000`.
 
+The deployed Vercel frontend defaults to the Hugging Face backend:
+
+```text
+https://vinayak-0-skeptical-scholar.hf.space
+```
+
 ## Local Data
 
 The local `data/` directory is ignored by Git. It stores:
@@ -175,7 +181,7 @@ ui_server.py              Local static UI server and /api/query endpoint
 - First query after startup still loads models and indexes. Later queries are faster because runtime components are cached.
 - The faster runtime profile skips some verification checks. It is useful for presentation latency, but it is less strict than the full reasoning pipeline.
 - The Hugging Face deployment copy under `hf-space/` is separate from the root app. Root changes should be mirrored there only when updating that deployment.
-- A future Vercel UI can deploy the static `web/` frontend, but it still needs a separate backend for the Python RAG pipeline. Vercel's free frontend hosting is not a direct replacement for this local Python runtime.
+- The Vercel deployment hosts the static `web/` frontend. The Python RAG backend runs separately on Hugging Face Spaces.
 
 ## Evaluation Notes
 
