@@ -1,360 +1,172 @@
 # Skeptical Scholar
 
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Live Demo](https://img.shields.io/badge/HuggingFace-Live%20Demo-yellow.svg)](https://huggingface.co/spaces/Vinayak-0/skeptical-scholar)
+Skeptical Scholar is a local research-assistant prototype for answering questions over a small scientific-paper corpus. It combines hybrid retrieval, reranking, evidence scoring, optional reasoning checks, and Groq-hosted answer generation.
 
-**Robust Neuro-Symbolic RAG with Uncertainty Estimation for Scientific Literature**
+The project is currently optimized for a presentation/demo workflow: run locally, ask questions through a Gradio UI, ingest more papers for new topics when needed, and keep latency low enough for recording. The deeper verification path is still available through `config.yaml`, but the default config now favors speed.
 
-A multi-layered document intelligence system that retrieves, reasons over, and generates answers from ArXiv research papers, with built-in hallucination detection and confidence-calibrated citations.
+## What It Does
 
-Try it: [huggingface.co/spaces/Vinayak-0/skeptical-scholar](https://huggingface.co/spaces/Vinayak-0/skeptical-scholar)
+Given a question, the system:
 
----
+1. Retrieves candidate chunks from a local SQLite paper store using BM25 and dense FAISS search.
+2. Merges sparse and dense results with reciprocal rank fusion.
+3. Reranks the candidates with a cross-encoder.
+4. Scores evidence quality using retrieval score, chunk type, entity overlap, and contradiction signals.
+5. Builds an evidence-grounded prompt and calls Groq for the final answer.
+6. Optionally verifies the answer with an NLI model.
 
-## Motivation
+The answer includes citations to the retrieved paper chunks. If retrieval or reasoning confidence is too weak, the system returns an "I don't know" response instead of forcing an answer.
 
-Large language models hallucinate. Standard RAG pipelines reduce this by grounding answers in retrieved documents, but they treat retrieval as a black box. If the retrieved chunks are contradictory, irrelevant, or insufficiently supported, the LLM still generates a confident-sounding answer.
+## Current Demo Mode
 
-Skeptical Scholar addresses this by adding a reasoning layer that evaluates evidence quality _before_ generation, and a verification layer that checks factual consistency _after_ generation. The system refuses to answer when evidence is insufficient rather than guessing.
+The default `config.yaml` enables a faster demo profile:
 
----
+```yaml
+runtime:
+  fast_mode: true
+  explain_idk_with_llm: false
 
-## What Makes This Different?
+retrieval:
+  candidate_top_k: 10
+  rerank_top_k: 3
 
-Most RAG systems retrieve and generate. Skeptical Scholar adds a critical layer between them: reasoning + verification.
+reasoning:
+  enable_entities: false
+  enable_contradictions: false
 
-| Feature     | Typical RAG     | Skeptical Scholar                                                  |
-| ----------- | --------------- | ------------------------------------------------------------------ |
-| Retrieval   | Single method   | **Hybrid** (BM25 + Dense + Cross-encoder)                          |
-| Reasoning   | None            | **Entity extraction, contradiction detection, confidence scoring** |
-| Generation  | Direct LLM call | **NLI-verified**, confidence-calibrated citations                  |
-| Uncertainty | None            | **3-layer IDK system** knows when it doesn't know                  |
-
----
-
-## Architecture
-
-```
-Query
-  |
-  v
-+-----------------------------------------+
-|  RETRIEVAL ENGINE                       |
-|  BM25 ---+                              |
-|          +--- Reciprocal Rank Fusion    |
-|  Dense --+    (Hybrid Merge)            |
-|          |                              |
-|  Cross-Encoder Reranker                 |
-|          |                              |
-|  IDK Trigger 1 (low relevance)         |
-+----------+------------------------------+
-           |
-           v
-+-----------------------------------------+
-|  REASONING LAYER                        |
-|  Chunk Classifier (claim/evidence)      |
-|  GLiNER Entity Extraction               |
-|  NLI Contradiction Detection            |
-|  Multi-Signal Confidence Scoring        |
-|  IDK Trigger 2 (weak evidence)         |
-+----------+------------------------------+
-           |
-           v
-+-----------------------------------------+
-|  GENERATION LAYER                       |
-|  Evidence-Grounded Prompt Building      |
-|  Groq LLM (Llama 3.1)                  |
-|  DeBERTa NLI Answer Verification       |
-|  IDK Trigger 3 (hallucination)         |
-+----------+------------------------------+
-           |
-           v
-   Verified Answer with Citations
-   + Confidence Score + NLI Report
+generation:
+  verify_answer: false
 ```
 
----
+This keeps retrieval, reranking, confidence scoring, citations, and generation active, but skips the slowest CPU-bound checks: GLiNER entity extraction, pairwise NLI contradiction detection, and post-generation NLI verification.
 
-## Quick Start
+For a fuller but slower run, set:
 
-### 1. Clone and Install
+```yaml
+reasoning:
+  enable_entities: true
+  enable_contradictions: true
+
+generation:
+  verify_answer: true
+```
+
+## Local Setup
 
 ```bash
-git clone https://github.com/vinayakpareek-0/skeptical-scholar.git
-cd skeptical-scholar
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 2. Set up API Key
+Create a `.env` file:
 
-Create a `.env` file in the project root:
-
-```
-GROQ_API_KEY=your_groq_api_key_here
+```env
+GROQ_API_KEY=your_groq_api_key
 ```
 
-Get a free key at [console.groq.com](https://console.groq.com)
-
-### 3. Run the Ingestion Pipeline
-
-```bash
-python -m src.ingestion.run_pipeline
-```
-
-This fetches papers from ArXiv + Semantic Scholar, parses PDFs, chunks text, and stores everything in SQLite.
-
-### 4. Build Dense Index
-
-```bash
-python -m src.retrieval.dense_retriever
-```
-
-### 5. Ask a Question
-
-```bash
-python -m src.generation.run_generation "attention mechanism"
-```
-
-**Sample output:**
-
-```
-Status: answered
-Confidence: 0.321
-NLI: supported=0.8, contradicted=0.0
-Citations: 5
-
-Answer:
-Based on the provided evidence, here's what I can infer about the attention mechanism:
-1. The attention mechanism plays a dominant role in sequence generation models,
-   particularly in tasks such as machine translation and abstractive text
-   summarization [1].
-2. It can be viewed as a mechanism for reallocating resources according to
-   importance or relevance [3].
-3. The attention mechanism has been used in various visual tasks, where it can
-   be seen as a lightweight yet effective mechanism [2].
-4. There are different types of attention mechanisms, including global attention
-   mechanisms based on supervised and unsupervised learning [5].
-```
-
-### 6. Launch the Chat UI
+Run the UI:
 
 ```bash
 python app.py
 ```
 
-Opens a Gradio chat interface at `http://localhost:7860`. Ask multiple questions in a single session.
+The app launches a Gradio chat interface, usually at `http://localhost:7860`.
 
----
+## Local Data
 
-## Improving Performance
+The local `data/` directory is ignored by Git. It stores:
 
-The system ships with ~100 papers. The more domain-relevant papers you ingest, the better the answers.
+- `data/db/arxiv.db`: SQLite paper and chunk store
+- `data/processed/dense_index.index`: FAISS dense index
+- `data/processed/chunk_ids.npy`: vector-to-chunk mapping
+- `data/metadata/metadata_checkpoint.json`: fetched-paper metadata
+- `data/raw/arxiv_papers/`: temporary PDF download directory
 
-**Add more papers** by editing `config.yaml`:
+The current local database contains a small research corpus, not the open web. If a question is outside the local corpus, the system may refuse or retrieve weak evidence. Use query ingestion to add relevant papers.
 
-```yaml
-arxiv:
-  queries:
-    - "your new topic here"
-    - "another topic"
-  max_results: 20 # increase from 10
+## Add Papers For A New Topic
 
-semantic_scholar:
-  max_results: 40 # increase from 20
-  min_citations: 5 # lower to include more papers
-```
-
-Then re-run ingestion and rebuild the index:
+To fetch and ingest papers for an ad hoc topic:
 
 ```bash
-python -m src.ingestion.run_pipeline
+python -m src.ingestion.query_ingest "retrieval augmented generation evaluation"
+```
+
+By default this fetches a small number of ArXiv and Semantic Scholar results, downloads PDFs, parses and chunks them, inserts them into SQLite, rebuilds the dense FAISS index, and clears runtime caches.
+
+To insert papers without rebuilding the dense index:
+
+```bash
+python -m src.ingestion.query_ingest "medical question answering rag" --no-rebuild-index
+```
+
+Tune the query-ingestion defaults in `config.yaml`:
+
+```yaml
+query_ingestion:
+  arxiv_max_results: 3
+  arxiv_client_delay: 1
+  semantic_scholar_max_results: 3
+  semantic_scholar_min_citations: 0
+  download_delay: 0.5
+  rebuild_dense_index: true
+```
+
+This is meant for quickly expanding the demo corpus around a topic. It is not a full web-scale crawler.
+
+## Rebuild The Dense Index
+
+If chunks already exist in SQLite and only the FAISS index needs rebuilding:
+
+```bash
 python -m src.retrieval.dense_retriever
 ```
 
-**Tune retrieval sensitivity** -- if the system triggers IDK too aggressively on valid queries, lower the threshold. If it answers questions it should refuse, raise it:
+## Full Corpus Pipeline
 
-```yaml
-retrieval:
-  idk_threshold: 0.0 # lower = more permissive, higher = stricter
+The original corpus-building pipeline still exists:
+
+```bash
+python -m src.ingestion.run_pipeline
 ```
 
-**Tune generation** -- adjust the LLM parameters:
-
-```yaml
-generation:
-  model: "llama-3.1-8b-instant"
-  temperature: 0.3 # lower = more deterministic
-  max_tokens: 512 # increase for longer answers
-```
-
-**Tune confidence scoring** -- adjust how much each signal contributes:
-
-```yaml
-confidence:
-  weights:
-    retrieval: 0.3
-    evidence_ratio: 0.3
-    entity_overlap: 0.2
-    contradiction_penalty: 0.2
-```
-
----
-
-## Three-Layer IDK System
-
-The system knows when it doesn't know. This is a critical feature for trustworthy AI.
-
-| Layer                  | Trigger                                            | What It Catches             |
-| ---------------------- | -------------------------------------------------- | --------------------------- |
-| **IDK 1** (Retrieval)  | Low rerank score                                   | Out-of-domain queries       |
-| **IDK 2** (Reasoning)  | Low confidence, high contradictions, no evidence   | Weak or conflicting sources |
-| **IDK 3** (Generation) | NLI contradiction, hedging language, short answers | LLM hallucinations          |
-
----
+It uses the static ArXiv and Semantic Scholar query lists in `config.yaml`. This is slower and better suited for batch corpus building than for interactive demo preparation.
 
 ## Project Structure
 
-```
-skeptical-scholar/
-├── app.py                       # Gradio chat UI
-├── config.yaml                  # All model names, paths, thresholds
-├── requirements.txt
-├── .env                         # GROQ_API_KEY (not committed)
-│
-├── src/
-│   ├── ingestion/               # Phase 1: Data Pipeline
-│   │   ├── arxiv_fetcher.py     # ArXiv paper fetching with checkpoints
-│   │   ├── semantic_scholar_fetcher.py
-│   │   ├── pdf_parser.py        # PDF to sections with PyMuPDF
-│   │   ├── chunker.py           # Section-aware chunking
-│   │   ├── database.py          # SQLite document store
-│   │   ├── citation_parser.py   # Citation graph builder
-│   │   └── run_pipeline.py      # End-to-end ingestion
-│   │
-│   ├── retrieval/               # Phase 2: Retrieval Engine
-│   │   ├── bm25_retriever.py    # Sparse retrieval
-│   │   ├── dense_retriever.py   # BGE-large + FAISS
-│   │   ├── hybrid_retriever.py  # Reciprocal Rank Fusion
-│   │   ├── reranker.py          # Cross-encoder reranking
-│   │   ├── idk_trigger.py       # IDK Layer 1
-│   │   └── run_rag.py           # Retrieval pipeline
-│   │
-│   ├── reasoning/               # Phase 3: Reasoning Layer
-│   │   ├── chunk_classify.py    # Heuristic + zero-shot classification
-│   │   ├── entity_extract.py    # GLiNER entity extraction
-│   │   ├── contradiction_detect.py
-│   │   ├── confidence_score.py  # Multi-signal confidence fusion
-│   │   ├── idk_trigger_2.py     # IDK Layer 2
-│   │   └── run_reasoning.py     # Reasoning pipeline
-│   │
-│   ├── generation/              # Phase 4: Generation Layer
-│   │   ├── llm_client.py        # Groq API client
-│   │   ├── prompts.py           # Evidence-grounded prompt templates
-│   │   ├── nli_verifier.py      # DeBERTa answer verification
-│   │   ├── idk_trigger3.py      # IDK Layer 3
-│   │   └── run_generation.py    # Full generation pipeline
-│   │
-│   └── evaluation/              # Phase 5: Evaluation
-│       ├── retrieval_eval.py    # Retrieval ablation study
-│       ├── generation_eval.py   # End-to-end generation eval
-│       ├── evaluation.json      # 20-query test set
-│       └── README.md            # Detailed evaluation report
-│
-└── data/
-    ├── db/arxiv.db              # SQLite document store
-    ├── processed/               # FAISS index + chunk mappings
-    └── metadata/                # Fetch checkpoints
+```text
+app.py                    Gradio chat UI
+config.yaml               Paths, models, thresholds, demo settings
+src/config.py             Config loader
+src/runtime_cache.py      Process-level cache for heavy models/indexes
+src/ingestion/            Fetch, parse, chunk, and store papers
+src/retrieval/            BM25, dense FAISS search, hybrid merge, rerank
+src/reasoning/            Chunk labels, optional entities/NLI, confidence
+src/generation/           Prompting, Groq client, optional NLI verification
+src/evaluation/           Earlier retrieval and generation evaluation files
+hf-space/                 Separate Hugging Face Space deployment copy
 ```
 
----
+## Main Technologies
 
-## Tech Stack
+- Gradio for the current local UI
+- SQLite for paper/chunk storage
+- rank-bm25 for sparse retrieval
+- sentence-transformers and FAISS for dense retrieval
+- cross-encoder reranking
+- optional GLiNER entity extraction
+- optional DeBERTa NLI checks
+- Groq for LLM generation
 
-| Component                   | Technology                                       |
-| --------------------------- | ------------------------------------------------ |
-| **Data Ingestion**          | ArXiv API, Semantic Scholar API, PyMuPDF, SQLite |
-| **Sparse Retrieval**        | rank-bm25                                        |
-| **Dense Retrieval**         | sentence-transformers (BGE-large-en-v1.5), FAISS |
-| **Reranking**               | CrossEncoder (ms-marco-MiniLM)                   |
-| **Entity Extraction**       | GLiNER (zero-shot NER)                           |
-| **Contradiction Detection** | DeBERTa NLI (cross-encoder)                      |
-| **Generation**              | Groq API (Llama 3.1 8B)                          |
-| **Answer Verification**     | DeBERTa NLI entailment checking                  |
-| **UI**                      | Gradio                                           |
+## Known Limits
 
----
+- Quality depends on the local corpus. The system does not automatically search the live web at answer time.
+- First query after startup still loads models and indexes. Later queries are faster because runtime components are cached.
+- Fast demo mode skips some verification checks. It is useful for presentation latency, but it is less strict than the full reasoning pipeline.
+- The Hugging Face deployment copy under `hf-space/` is separate from the root app. Root changes should be mirrored there only when updating that deployment.
+- A future Vercel UI will need a separate backend for the Python RAG pipeline; Vercel's free frontend hosting is not a direct replacement for this Python runtime.
 
-## Evaluation Results
+## Evaluation Notes
 
-Tested on 20 queries: 10 in-domain, 5 out-of-domain, 5 adversarial. Full report with per-query breakdowns at [src/evaluation/README.md](src/evaluation/README.md).
-
-### Retrieval (IDK Layer 1)
-
-| Category      | Queries | Avg Rerank Score | IDK Accuracy        |
-| ------------- | ------- | ---------------- | ------------------- |
-| In-domain     | 10      | 5.030            | 0 false triggers    |
-| Out-of-domain | 5       | -7.500           | 5/5 rejected (100%) |
-| Adversarial   | 5       | 0.528            | 2/5 rejected at L1  |
-
-The cross-encoder reranker is the key discriminator. BM25 scores are unreliable for OOD detection (out-of-domain queries still score 20-35 on BM25).
-
-### End-to-End Generation (All 3 IDK Layers)
-
-| Category      | Passed | Total  | Accuracy |
-| ------------- | ------ | ------ | -------- |
-| In-domain     | 8      | 10     | 80%      |
-| Out-of-domain | 5      | 5      | 100%     |
-| Adversarial   | 5      | 5      | 100%     |
-| **Overall**   | **18** | **20** | **90%**  |
-
-The two in-domain failures are data coverage gaps, not pipeline bugs. Both would improve with a larger corpus.
-
----
-
-## Data Description
-
-The system ingests papers from ArXiv and Semantic Scholar into a local SQLite database. After processing:
-
-- **Papers table** - paper metadata: arxiv_id, title, authors, abstract, publication date, PDF URL
-- **Chunks table** - text segments with fields: `chunk_id`, `paper_id`, `section` (e.g. Introduction, Methods), `text`, `word_count`
-- **Dense index** - FAISS flat inner-product index over BGE-large-en-v1.5 embeddings (1024-dim), with a `chunk_ids.npy` mapping vector positions to chunk IDs
-- **Citation graph** - NetworkX directed graph stored as JSON, mapping paper titles to cited titles
-
-Chunks are created with section-aware splitting: max 500 words, 50-word overlap, minimum 50 words. Each chunk retains its source paper and section for citation tracing.
-
----
-
-## Configuration
-
-All model names, thresholds, and paths are centralized in `config.yaml`. Zero hardcoded values in source code.
-
-| Parameter                 | Default                  | Description                                   |
-| ------------------------- | ------------------------ | --------------------------------------------- |
-| `dense.model_name`        | `BAAI/bge-large-en-v1.5` | Embedding model for dense retrieval           |
-| `retrieval.idk_threshold` | `0.0`                    | Rerank score below which IDK Layer 1 triggers |
-| `chunking.max_length`     | `500`                    | Max words per chunk                           |
-| `chunking.overlap`        | `50`                     | Word overlap between consecutive chunks       |
-| `generation.model`        | `llama-3.1-8b-instant`   | Groq LLM model for answer generation          |
-| `generation.temperature`  | `0.3`                    | LLM sampling temperature                      |
-| `nli.model_name`          | `nli-deberta-v3-base`    | NLI model for contradiction and verification  |
-| `entity.model_name`       | `gliner_medium-v2.1`     | GLiNER model for entity extraction            |
-
----
-
-## Roadmap
-
-- [x] Phase 1: Data Pipeline (ArXiv + Semantic Scholar)
-- [x] Phase 2: Retrieval Engine (Hybrid + Reranker)
-- [x] Phase 3: Reasoning Layer (Entities + Contradictions + Confidence)
-- [x] Phase 4: Generation Layer (Groq + NLI Verification)
-- [x] Phase 5: Evaluation (90% overall, 100% OOD rejection)
-- [x] Phase 6: Gradio UI + HuggingFace Spaces Deployment
-
----
-
-## License
-
-MIT
+Earlier evaluation files are in `src/evaluation/`. They tested a 20-query set across in-domain, out-of-domain, and adversarial prompts. Treat those results as historical for the original full pipeline and corpus state, not as a guarantee for every future ingested topic or fast-mode setting.
