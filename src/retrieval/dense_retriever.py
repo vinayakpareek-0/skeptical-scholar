@@ -57,6 +57,11 @@ def save_index(index , path):
     path.parent.mkdir(parents=True, exist_ok=True) 
     faiss.write_index(index , str(path))
 
+def save_chunk_ids(chunks: list[dict], path):
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    np.save(str(path), [chunk["chunk_id"] for chunk in chunks])
+
 def load_index(path):
     import faiss
 
@@ -67,13 +72,19 @@ def load_dense_model(model_name:str):
 
     return SentenceTransformer(model_name)
 
-if __name__ == "__main__":
+def rebuild_dense_index():
     config = load_config()
     conn = init_db(PROJECT_ROOT / config["database"]["path"])
-    chunks = load_chunks(conn)
-    index = load_index(PROJECT_ROOT / config["dense"]["index_path"])
-    model = load_dense_model(config["dense"]["model_name"])
-    query = "What is the role of attention mechanism in transformers?"
-    results = search_dense(index , model , query , chunks , top_k=5)
-    for r in results: 
-        print(f"[{r['score']:.3f}] {r['paper_id']} | {r['text'][:150]}")
+    try:
+        chunks = load_chunks(conn)
+    finally:
+        conn.close()
+
+    index, _, chunks = build_dense_index(chunks, config["dense"]["model_name"])
+    save_index(index, PROJECT_ROOT / config["dense"]["index_path"])
+    save_chunk_ids(chunks, PROJECT_ROOT / "data" / "processed" / "chunk_ids.npy")
+    return len(chunks)
+
+if __name__ == "__main__":
+    total_chunks = rebuild_dense_index()
+    print(f"Rebuilt dense index for {total_chunks} chunks")

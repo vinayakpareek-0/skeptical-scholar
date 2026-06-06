@@ -11,8 +11,8 @@ from config import load_config , PROJECT_ROOT
 
 
 
-def fetch_arxiv_papers(query: str, max_results: int) -> List[Dict]:
-    client = arxiv.Client(delay_seconds=5, num_retries=5) 
+def fetch_arxiv_papers(query: str, max_results: int, delay_seconds: float = 5) -> List[Dict]:
+    client = arxiv.Client(delay_seconds=delay_seconds, num_retries=5)
     search = arxiv.Search(
         query=query,
         max_results=max_results,

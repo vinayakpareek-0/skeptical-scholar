@@ -80,6 +80,14 @@ semantic_scholar:
   max_results: 20
   min_citations: 10
 
+query_ingestion:
+  arxiv_max_results: 3
+  arxiv_client_delay: 1
+  semantic_scholar_max_results: 3
+  semantic_scholar_min_citations: 0
+  download_delay: 0.5
+  rebuild_dense_index: true
+
 generation:
   model: "llama-3.1-8b-instant"
   temperature: 0.3

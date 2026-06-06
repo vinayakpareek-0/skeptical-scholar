@@ -54,11 +54,16 @@ def init_db(db_path:str):
     return db
 
 def insert_papers(conn:sqlite3.Connection , papers:List[Dict]):
+    def format_authors(authors):
+        if isinstance(authors, list):
+            return ",".join(authors)
+        return authors or ""
+
     cursor = conn.cursor()
     cursor.executemany("""
     INSERT OR IGNORE INTO papers(paper_id , title , authors , abstract , published_date , arxiv_url , pdf_path) Values(?,?,?,?,?,?,?)
     """,[
-        (paper["paper_id"] , paper["title"] , ",".join(paper["authors"]), paper["abstract"] , paper["published_date"] , paper["arxiv_url"] , paper["pdf_path"])
+        (paper["paper_id"] , paper["title"] , format_authors(paper["authors"]), paper["abstract"] , paper["published_date"] , paper["arxiv_url"] , paper["pdf_path"])
         for paper in papers
     ])
     conn.commit()
@@ -94,4 +99,4 @@ if __name__ =="__main__":
     db_path = PROJECT_ROOT/config["database"]["path"]
     init_db(db_path)
     db = sqlite3.connect(db_path)
-    print(get_all_chunks(db)) 
+    print(get_all_chunks(db))
