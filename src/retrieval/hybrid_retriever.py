@@ -38,7 +38,7 @@ def reciprocal_rank_fusion(bm25_results, dense_results, k=60):
 def search_hybrid(query , bm25_index , dense_index , model , chunks, top_k=20):
     bm25_results  = search_bm25(bm25_index  ,query , chunks , top_k =top_k)
     dense_results = search_dense(dense_index ,model , query , chunks , top_k=top_k )
-    return reciprocal_rank_fusion(bm25_results , dense_results , k=60)[:top_k]
+    return reciprocal_rank_fusion(bm25_results , dense_results , k=60)
 
 def run_hybrid_retrieval(query , top_k=20): 
     """

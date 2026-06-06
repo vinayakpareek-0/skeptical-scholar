@@ -23,7 +23,15 @@ def run_rag(query):
         reranker = get_reranker()
         results = rerank(reranker, query, candidates, top_k=rerank_top_k)
     else:
-        results = candidates[:rerank_top_k]
+        results = sorted(
+            candidates,
+            key=lambda item: (
+                item.get("dense_score", -1.0),
+                item.get("score", 0.0),
+                item.get("bm25_score", 0.0),
+            ),
+            reverse=True,
+        )[:rerank_top_k]
         for result in results:
             result["rerank_score"] = result.get("dense_score", result.get("score", 0.0))
         threshold = retrieval_cfg.get("dense_idk_threshold", threshold)

@@ -70,7 +70,7 @@ retrieval:
   idk_threshold: 0.0
   candidate_top_k: 10
   rerank_top_k: 3
-  dense_idk_threshold: 0.25
+  dense_idk_threshold: 0.1
 
 semantic_scholar:
   enabled: true
