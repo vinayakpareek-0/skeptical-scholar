@@ -70,6 +70,16 @@ def run_generation(query):
             "is_reliable": True,
             "skipped": True
         }
+        idk3 = check_generation_confidence(answer, nli_result)
+        if idk3["triggered"]:
+            timings["total"] = round(perf_counter() - started_at, 3)
+            return {
+                "status": "idk",
+                "reason": f"IDK Layer 3: {idk3['reason']}",
+                "answer": answer,
+                "nli": nli_result,
+                "timings": timings
+            }
 
     timings["total"] = round(perf_counter() - started_at, 3)
     return {
