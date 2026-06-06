@@ -47,9 +47,9 @@ demo = gr.ChatInterface(
     title="Skeptical Scholar",
     description="Ask questions about AI/ML research. Answers are grounded in retrieved ArXiv papers with NLI verification. The system will say 'I don't know' when evidence is insufficient.",
     examples=[
-        "How does RAG reduce hallucination?",
-        "Explain the attention mechanism in transformers",
         "What is chain-of-thought prompting?",
+        "Explain the attention mechanism in transformers",
+        "How does RAG reduce hallucination?",
         "What is the best pizza recipe?",
     ],
 )
