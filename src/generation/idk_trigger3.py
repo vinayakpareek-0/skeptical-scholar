@@ -7,6 +7,14 @@ from config import load_config
 def check_generation_confidence(answer, nli_results):
     config = load_config()
     idk_cfg = config["idk"]
+    normalized_answer = answer.strip().lower()
+
+    if normalized_answer.startswith("i don't know") or normalized_answer.startswith("i do not know"):
+        return {
+            "triggered": True,
+            "reason": "Answer explicitly says it does not know",
+            "suggestion": "Retrieved evidence was insufficient for generation"
+        }
 
     if not nli_results["is_reliable"]:
         return {
