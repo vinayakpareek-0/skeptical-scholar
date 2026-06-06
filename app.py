@@ -22,7 +22,7 @@ def format_response(result):
     response = result["answer"] + "\n\n---\n\n"
     response += f"**Confidence:** {conf:.3f}\n\n"
     if nli.get("skipped"):
-        response += "**NLI Verification:** skipped in fast demo mode\n\n"
+        response += "**Verification:** evidence-only response\n\n"
     else:
         response += f"**NLI Verification:** {nli['supported']*100:.0f}% supported, {nli['contradicted']*100:.0f}% contradicted\n\n"
 
@@ -45,7 +45,7 @@ def chat(message, history):
 demo = gr.ChatInterface(
     fn=chat,
     title="Skeptical Scholar",
-    description="Ask questions about AI/ML research. Answers are grounded in retrieved ArXiv papers with NLI verification. The system will say 'I don't know' when evidence is insufficient.",
+    description="Ask questions about AI/ML research. Answers are grounded in retrieved ArXiv papers, with citations when evidence is available.",
     examples=[
         "What is chain-of-thought prompting?",
         "Explain the attention mechanism in transformers",

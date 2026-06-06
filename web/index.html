@@ -6,198 +6,361 @@
   <title>Skeptical Scholar</title>
   <style>
     :root {
-      --bg: #f5f7f8;
+      --bg: #f6f7f9;
       --panel: #ffffff;
-      --ink: #1b2028;
-      --muted: #68707d;
-      --line: #d9dee5;
+      --panel-2: #f9fafb;
+      --ink: #161a22;
+      --muted: #667085;
+      --line: #dde2e8;
+      --line-dark: #c7ced8;
       --accent: #0f766e;
-      --accent-dark: #115e59;
-      --warn: #9a3412;
-      --soft: #eef5f4;
-      --shadow: 0 14px 34px rgba(24, 32, 43, 0.08);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --accent-2: #6d8f88;
+      --warn: #a64712;
+      --ok: #12805c;
+      --chip: #eef4f2;
+      --shadow: 0 18px 42px rgba(22, 26, 34, 0.09);
+      --mono: "SFMono-Regular", "Cascadia Code", "Liberation Mono", Consolas, monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: var(--sans);
     }
 
     * {
       box-sizing: border-box;
     }
 
+    html,
+    body {
+      min-height: 100%;
+    }
+
     body {
       margin: 0;
-      min-height: 100vh;
-      background: var(--bg);
       color: var(--ink);
+      background:
+        linear-gradient(rgba(221, 226, 232, 0.5) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(221, 226, 232, 0.5) 1px, transparent 1px),
+        var(--bg);
+      background-size: 32px 32px;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
     }
 
     .shell {
       min-height: 100vh;
       display: grid;
-      grid-template-columns: 280px minmax(0, 1fr);
+      grid-template-columns: 318px minmax(0, 1fr);
     }
 
     aside {
-      border-right: 1px solid var(--line);
-      background: #fbfcfd;
-      padding: 22px;
+      min-width: 0;
+      border-right: 1px solid var(--line-dark);
+      background: rgba(255, 255, 255, 0.92);
       display: flex;
       flex-direction: column;
-      gap: 22px;
     }
 
-    .brand {
+    .side-top {
+      padding: 24px 22px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .mark {
+      width: 42px;
+      height: 42px;
       display: grid;
-      gap: 4px;
+      place-items: center;
+      border: 1px solid var(--line-dark);
+      border-radius: 8px;
+      background:
+        linear-gradient(135deg, transparent 0 44%, rgba(15, 118, 110, 0.18) 45% 55%, transparent 56%),
+        #fff;
+      color: var(--accent);
+      font-family: var(--mono);
+      font-weight: 800;
+      margin-bottom: 14px;
     }
 
-    .brand h1 {
+    h1 {
       margin: 0;
-      font-size: 22px;
-      line-height: 1.2;
-      font-weight: 750;
+      font-size: 24px;
+      line-height: 1.12;
+      letter-spacing: 0;
+      font-weight: 780;
+    }
+
+    .subtitle {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .side-section {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--line);
+      display: grid;
+      gap: 12px;
+    }
+
+    .section-title {
+      margin: 0;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: #596273;
+      text-transform: uppercase;
       letter-spacing: 0;
     }
 
-    .brand span {
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .status {
+    .status-grid {
       display: grid;
-      gap: 10px;
-      padding: 14px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--panel);
+      gap: 8px;
     }
 
     .status-row {
+      min-height: 34px;
       display: flex;
+      align-items: center;
       justify-content: space-between;
       gap: 12px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel-2);
       color: var(--muted);
-      font-size: 13px;
+      font-size: 12px;
     }
 
     .status-row strong {
       color: var(--ink);
-      font-weight: 650;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .backend-control {
+      display: grid;
+      gap: 8px;
+    }
+
+    .backend-control input {
+      width: 100%;
+      min-height: 38px;
+      border: 1px solid var(--line-dark);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      padding: 9px 10px;
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+
+    .backend-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .side-button {
+      min-height: 34px;
+      border: 1px solid var(--line-dark);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .side-button:hover,
+    .example:hover {
+      border-color: var(--accent);
+      background: var(--chip);
     }
 
     .examples {
       display: grid;
-      gap: 8px;
-    }
-
-    .examples h2 {
-      margin: 0 0 4px;
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 650;
-      text-transform: uppercase;
+      gap: 9px;
     }
 
     .example {
       width: 100%;
-      min-height: 44px;
-      padding: 10px 12px;
+      min-height: 48px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      background: var(--panel);
+      background: #fff;
       color: var(--ink);
+      padding: 11px 12px;
       text-align: left;
-      font: inherit;
       font-size: 13px;
-      cursor: pointer;
+      line-height: 1.25;
     }
 
-    .example:hover {
-      border-color: var(--accent);
-      background: var(--soft);
+    .side-foot {
+      margin-top: auto;
+      padding: 18px 22px 22px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 11px;
+      line-height: 1.5;
     }
 
     main {
       min-width: 0;
+      height: 100vh;
       display: grid;
       grid-template-rows: auto minmax(0, 1fr) auto;
-      height: 100vh;
     }
 
     header {
-      border-bottom: 1px solid var(--line);
-      background: rgba(255, 255, 255, 0.88);
-      padding: 18px 26px;
+      min-height: 76px;
+      border-bottom: 1px solid var(--line-dark);
+      background: rgba(255, 255, 255, 0.86);
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 16px;
+      padding: 18px 28px;
     }
 
-    header h2 {
+    .header-copy {
+      min-width: 0;
+      display: grid;
+      gap: 3px;
+    }
+
+    .header-copy h2 {
       margin: 0;
       font-size: 18px;
       letter-spacing: 0;
+      font-weight: 740;
     }
 
-    .mode {
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    .header-copy span {
       color: var(--muted);
       font-size: 13px;
     }
 
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
+    .run-state {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .pulse {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
       background: var(--accent);
-      box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+      box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.13);
     }
 
     .conversation {
       overflow: auto;
-      padding: 26px;
+      padding: 28px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 18px;
+    }
+
+    .empty-state {
+      width: min(760px, 100%);
+      margin: auto;
+      border: 1px solid var(--line-dark);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: var(--shadow);
+      padding: 26px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .empty-state h3 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .empty-state p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 14px;
     }
 
     .message {
-      max-width: 920px;
-      border: 1px solid var(--line);
+      width: min(930px, 100%);
+      border: 1px solid var(--line-dark);
       border-radius: 8px;
       background: var(--panel);
       box-shadow: var(--shadow);
+      overflow: hidden;
     }
 
     .message.user {
-      align-self: flex-end;
       width: min(720px, 92%);
+      align-self: flex-end;
       box-shadow: none;
-      background: #fdfefe;
+      background: #fcfdfd;
     }
 
     .message.assistant {
       align-self: flex-start;
-      width: min(920px, 100%);
     }
 
     .message-head {
-      padding: 12px 14px;
+      min-height: 44px;
       border-bottom: 1px solid var(--line);
+      padding: 11px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
       color: var(--muted);
-      font-size: 13px;
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+
+    .speaker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--ink);
+      font-weight: 800;
+    }
+
+    .speaker::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      background: var(--accent);
+    }
+
+    .message.user .speaker::before {
+      background: #7b8796;
     }
 
     .message-body {
-      padding: 15px;
-      line-height: 1.55;
+      padding: 16px;
+      line-height: 1.58;
       font-size: 15px;
       white-space: pre-wrap;
     }
@@ -206,40 +369,43 @@
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
-      padding: 0 15px 15px;
+      padding: 0 16px 16px;
     }
 
     .pill {
       border: 1px solid var(--line);
       border-radius: 999px;
-      padding: 5px 9px;
-      font-size: 12px;
-      color: var(--muted);
-      background: #fafbfc;
+      padding: 6px 10px;
+      color: #465160;
+      background: #fbfcfd;
+      font-family: var(--mono);
+      font-size: 11px;
     }
 
     .pill.warn {
       color: var(--warn);
-      border-color: #fed7aa;
-      background: #fff7ed;
+      border-color: #f3c99c;
+      background: #fff9f2;
     }
 
     .sources {
       border-top: 1px solid var(--line);
-      padding: 12px 15px 15px;
+      padding: 13px 16px 16px;
       display: grid;
       gap: 7px;
+      background: #fbfcfd;
     }
 
     .source {
       color: var(--muted);
-      font-size: 13px;
+      font-family: var(--mono);
+      font-size: 12px;
     }
 
     form {
-      border-top: 1px solid var(--line);
-      background: #fbfcfd;
-      padding: 18px 26px;
+      border-top: 1px solid var(--line-dark);
+      background: rgba(255, 255, 255, 0.92);
+      padding: 18px 28px;
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 12px;
@@ -248,53 +414,51 @@
     textarea {
       width: 100%;
       resize: none;
-      min-height: 52px;
+      min-height: 54px;
       max-height: 150px;
-      padding: 13px 14px;
-      border: 1px solid var(--line);
+      border: 1px solid var(--line-dark);
       border-radius: 8px;
-      font: inherit;
+      background: #fff;
+      color: var(--ink);
+      padding: 14px 15px;
       font-size: 15px;
       line-height: 1.4;
-      color: var(--ink);
-      background: var(--panel);
     }
 
-    textarea:focus {
-      outline: 2px solid rgba(15, 118, 110, 0.22);
+    textarea:focus,
+    .backend-control input:focus {
+      outline: 2px solid rgba(15, 118, 110, 0.18);
       border-color: var(--accent);
     }
 
     button.primary {
-      min-width: 108px;
-      border: 0;
+      min-width: 112px;
+      border: 1px solid #0d5d56;
       border-radius: 8px;
       background: var(--accent);
-      color: white;
-      font: inherit;
-      font-weight: 700;
-      cursor: pointer;
-      padding: 0 18px;
+      color: #fff;
+      padding: 0 20px;
+      font-weight: 800;
     }
 
     button.primary:hover {
-      background: var(--accent-dark);
+      background: #0b625b;
     }
 
     button.primary:disabled,
     textarea:disabled {
       cursor: not-allowed;
-      opacity: 0.62;
+      opacity: 0.58;
     }
 
-    @media (max-width: 860px) {
+    @media (max-width: 900px) {
       .shell {
         grid-template-columns: 1fr;
       }
 
       aside {
         border-right: 0;
-        border-bottom: 1px solid var(--line);
+        border-bottom: 1px solid var(--line-dark);
       }
 
       main {
@@ -317,45 +481,75 @@
 <body>
   <div class="shell">
     <aside>
-      <div class="brand">
+      <div class="side-top">
+        <div class="mark">SS</div>
         <h1>Skeptical Scholar</h1>
-        <span>Local scientific RAG</span>
+        <div class="subtitle">A citation-first assistant over scientific papers.</div>
       </div>
 
-      <div class="status">
-        <div class="status-row"><span>Backend</span><strong id="backendStatus">checking</strong></div>
-        <div class="status-row"><span>Warmup</span><strong id="warmupStatus">checking</strong></div>
-        <div class="status-row"><span>Last run</span><strong id="lastLatency">-</strong></div>
-        <div class="status-row"><span>Mode</span><strong>fast demo</strong></div>
-      </div>
+      <section class="side-section">
+        <h2 class="section-title">System</h2>
+        <div class="status-grid">
+          <div class="status-row"><span>Backend</span><strong id="backendStatus">checking</strong></div>
+          <div class="status-row"><span>Warmup</span><strong id="warmupStatus">checking</strong></div>
+          <div class="status-row"><span>Last run</span><strong id="lastLatency">-</strong></div>
+          <div class="status-row"><span>Corpus</span><strong>arXiv papers</strong></div>
+        </div>
+      </section>
 
-      <div class="examples">
-        <h2>Examples</h2>
-        <button class="example" type="button">What is chain-of-thought prompting?</button>
-        <button class="example" type="button">Explain the attention mechanism in transformers</button>
-        <button class="example" type="button">How does RAG reduce hallucination?</button>
-        <button class="example" type="button">What is the best pizza recipe?</button>
-      </div>
+      <section class="side-section">
+        <h2 class="section-title">Backend URL</h2>
+        <div class="backend-control">
+          <input id="apiBaseInput" spellcheck="false" aria-label="Backend URL">
+          <div class="backend-actions">
+            <button class="side-button" id="saveBackend" type="button">Save</button>
+            <button class="side-button" id="resetBackend" type="button">Reset</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="side-section">
+        <h2 class="section-title">Examples</h2>
+        <div class="examples">
+          <button class="example" type="button">What is chain-of-thought prompting?</button>
+          <button class="example" type="button">Explain the attention mechanism in transformers</button>
+          <button class="example" type="button">How does RAG reduce hallucination?</button>
+          <button class="example" type="button">What is the best pizza recipe?</button>
+        </div>
+      </section>
+
+      <div class="side-foot">retrieval / rerank / grounded generation</div>
     </aside>
 
     <main>
       <header>
-        <h2>Research Chat</h2>
-        <div class="mode"><span class="dot"></span><span id="busyText">ready</span></div>
+        <div class="header-copy">
+          <h2>Research Console</h2>
+          <span>Ask a question and inspect the evidence trail.</span>
+        </div>
+        <div class="run-state"><span class="pulse"></span><span id="busyText">ready</span></div>
       </header>
 
-      <section class="conversation" id="conversation" aria-live="polite"></section>
+      <section class="conversation" id="conversation" aria-live="polite">
+        <div class="empty-state" id="emptyState">
+          <h3>Ask from the paper corpus.</h3>
+          <p>Responses are grounded in retrieved chunks and include source paper IDs when evidence is available.</p>
+        </div>
+      </section>
 
       <form id="queryForm">
-        <textarea id="queryInput" rows="2" placeholder="Ask about the local paper corpus"></textarea>
+        <textarea id="queryInput" rows="2" placeholder="Ask about AI, ML, deep learning, retrieval, transformers, reasoning..."></textarea>
         <button class="primary" id="submitButton" type="submit">Ask</button>
       </form>
     </main>
   </div>
 
   <script>
-    const apiBase = localStorage.getItem("skepticalApiBase") || "";
+    const defaultApiBase = window.SKEPTICAL_API_BASE || "http://127.0.0.1:8000";
+    let apiBase = localStorage.getItem("skepticalApiBase") || defaultApiBase;
+
     const conversation = document.querySelector("#conversation");
+    const emptyState = document.querySelector("#emptyState");
     const form = document.querySelector("#queryForm");
     const input = document.querySelector("#queryInput");
     const submitButton = document.querySelector("#submitButton");
@@ -363,6 +557,11 @@
     const warmupStatus = document.querySelector("#warmupStatus");
     const busyText = document.querySelector("#busyText");
     const lastLatency = document.querySelector("#lastLatency");
+    const apiBaseInput = document.querySelector("#apiBaseInput");
+    const saveBackend = document.querySelector("#saveBackend");
+    const resetBackend = document.querySelector("#resetBackend");
+
+    apiBaseInput.value = apiBase;
 
     function escapeHtml(value) {
       return String(value)
@@ -373,13 +572,20 @@
         .replaceAll("'", "&#039;");
     }
 
+    function removeEmptyState() {
+      if (emptyState) {
+        emptyState.remove();
+      }
+    }
+
     function addMessage(role, body, options = {}) {
+      removeEmptyState();
       const article = document.createElement("article");
       article.className = `message ${role}`;
       const title = role === "user" ? "You" : "Skeptical Scholar";
       article.innerHTML = `
         <div class="message-head">
-          <strong>${title}</strong>
+          <span class="speaker">${title}</span>
           <span>${options.status || ""}</span>
         </div>
         <div class="message-body">${escapeHtml(body || "")}</div>
@@ -480,15 +686,14 @@
         if (result.status === "idk") {
           addMessage("assistant", result.explanation || result.reason, {
             status: "idk",
-            meta: [{ label: `Latency ${total.toFixed(2)}s`, warn: false }]
+            meta: [{ label: `latency ${total.toFixed(2)}s` }]
           });
           return;
         }
 
         const meta = [
-          { label: `Confidence ${Number(result.confidence?.score || 0).toFixed(3)}` },
-          { label: result.nli?.skipped ? "NLI skipped" : `NLI supported ${Math.round((result.nli?.supported || 0) * 100)}%` },
-          { label: `Latency ${total.toFixed(2)}s` }
+          { label: `confidence ${Number(result.confidence?.score || 0).toFixed(3)}` },
+          { label: `latency ${total.toFixed(2)}s` }
         ];
 
         addMessage("assistant", result.answer, {
@@ -499,7 +704,7 @@
       } catch (error) {
         addMessage("assistant", error.message, {
           status: "error",
-          meta: [{ label: "Backend unavailable", warn: true }]
+          meta: [{ label: "backend unavailable", warn: true }]
         });
       } finally {
         delete submitButton.dataset.queryRunning;
@@ -529,6 +734,21 @@
         input.value = button.textContent.trim();
         form.requestSubmit();
       });
+    });
+
+    saveBackend.addEventListener("click", () => {
+      apiBase = apiBaseInput.value.trim() || defaultApiBase;
+      localStorage.setItem("skepticalApiBase", apiBase);
+      checkHealth();
+      checkStatus();
+    });
+
+    resetBackend.addEventListener("click", () => {
+      apiBase = defaultApiBase;
+      apiBaseInput.value = apiBase;
+      localStorage.removeItem("skepticalApiBase");
+      checkHealth();
+      checkStatus();
     });
 
     checkHealth();

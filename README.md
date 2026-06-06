@@ -2,7 +2,7 @@
 
 Skeptical Scholar is a local research-assistant prototype for answering questions over a small scientific-paper corpus. It combines hybrid retrieval, reranking, evidence scoring, optional reasoning checks, and Groq-hosted answer generation.
 
-The project is currently optimized for a presentation/demo workflow: run locally, ask questions through a Gradio UI, ingest more papers for new topics when needed, and keep latency low enough for recording. The deeper verification path is still available through `config.yaml`, but the default config now favors speed.
+The project is currently optimized for a local presentation workflow: run the backend locally, ask questions through the web UI, ingest more papers for new topics when needed, and keep latency low enough for recording. The deeper verification path is still available through `config.yaml`, but the default config now favors speed.
 
 ## What It Does
 
@@ -17,9 +17,9 @@ Given a question, the system:
 
 The answer includes citations to the retrieved paper chunks. If retrieval or reasoning confidence is too weak, the system returns an "I don't know" response instead of forcing an answer.
 
-## Current Demo Mode
+## Current Runtime Profile
 
-The default `config.yaml` enables a faster demo profile:
+The default `config.yaml` enables a faster runtime profile:
 
 ```yaml
 runtime:
@@ -73,7 +73,7 @@ python app.py
 
 The app launches a Gradio chat interface, usually at `http://localhost:7860`.
 
-For the custom demo UI:
+For the custom web UI:
 
 ```bash
 python ui_server.py
@@ -121,7 +121,7 @@ query_ingestion:
   rebuild_dense_index: true
 ```
 
-This is meant for quickly expanding the demo corpus around a topic. It is not a full web-scale crawler.
+This is meant for quickly expanding the local corpus around a topic. It is not a full web-scale crawler.
 
 ## Rebuild The Dense Index
 
@@ -139,13 +139,13 @@ The original corpus-building pipeline still exists:
 python -m src.ingestion.run_pipeline
 ```
 
-It uses the static ArXiv and Semantic Scholar query lists in `config.yaml`. This is slower and better suited for batch corpus building than for interactive demo preparation.
+It uses the static ArXiv and Semantic Scholar query lists in `config.yaml`. This is slower and better suited for batch corpus building than for interactive preparation.
 
 ## Project Structure
 
 ```text
 app.py                    Gradio chat UI
-config.yaml               Paths, models, thresholds, demo settings
+config.yaml               Paths, models, thresholds, runtime settings
 src/config.py             Config loader
 src/runtime_cache.py      Process-level cache for heavy models/indexes
 src/ingestion/            Fetch, parse, chunk, and store papers
@@ -154,7 +154,7 @@ src/reasoning/            Chunk labels, optional entities/NLI, confidence
 src/generation/           Prompting, Groq client, optional NLI verification
 src/evaluation/           Earlier retrieval and generation evaluation files
 hf-space/                 Separate Hugging Face Space deployment copy
-web/                      Static custom demo UI
+web/                      Static custom web UI
 ui_server.py              Local static UI server and /api/query endpoint
 ```
 
@@ -173,7 +173,7 @@ ui_server.py              Local static UI server and /api/query endpoint
 
 - Quality depends on the local corpus. The system does not automatically search the live web at answer time.
 - First query after startup still loads models and indexes. Later queries are faster because runtime components are cached.
-- Fast demo mode skips some verification checks. It is useful for presentation latency, but it is less strict than the full reasoning pipeline.
+- The faster runtime profile skips some verification checks. It is useful for presentation latency, but it is less strict than the full reasoning pipeline.
 - The Hugging Face deployment copy under `hf-space/` is separate from the root app. Root changes should be mirrored there only when updating that deployment.
 - A future Vercel UI can deploy the static `web/` frontend, but it still needs a separate backend for the Python RAG pipeline. Vercel's free frontend hosting is not a direct replacement for this local Python runtime.
 
