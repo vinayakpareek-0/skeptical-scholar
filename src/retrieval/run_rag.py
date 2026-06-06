@@ -14,10 +14,13 @@ from retrieval.idk_trigger import check_retrieval_confidence
 def run_rag(query):
     config = get_config()
     reranker = get_reranker()
-    threshold = config["retrieval"]["idk_threshold"]
+    retrieval_cfg = config["retrieval"]
+    threshold = retrieval_cfg["idk_threshold"]
+    candidate_top_k = retrieval_cfg.get("candidate_top_k", 20)
+    rerank_top_k = retrieval_cfg.get("rerank_top_k", 5)
 
-    candidates = run_hybrid_retrieval(query, top_k=20)
-    results = rerank(reranker, query, candidates, top_k=5)
+    candidates = run_hybrid_retrieval(query, top_k=candidate_top_k)
+    results = rerank(reranker, query, candidates, top_k=rerank_top_k)
     idk = check_retrieval_confidence(results, threshold=threshold)
 
     if idk["triggered"]:

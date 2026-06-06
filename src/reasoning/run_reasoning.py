@@ -10,10 +10,13 @@ from reasoning.entity_extract import extract_from_chunks
 from reasoning.contradiction_detect import detect_contradictions
 from reasoning.confidence_score import compute_confidence
 from reasoning.idk_trigger_2 import check_reasoning_confidence
-from runtime_cache import get_entity_extractor, get_nli_model
+from runtime_cache import get_config, get_entity_extractor, get_nli_model
 
 
 def run_reasoning(query):
+    config = get_config()
+    reasoning_cfg = config.get("reasoning", {})
+
     # retrieve + rerank + idk layer 1
     chunks = run_rag(query)
     if not chunks:
@@ -22,13 +25,18 @@ def run_reasoning(query):
     # classify chunks
     chunks = classify_chunks(chunks, method="heuristic")
 
-    # extract entities
-    extractor = get_entity_extractor()
-    chunks = extract_from_chunks(extractor, chunks)
+    if reasoning_cfg.get("enable_entities", True):
+        extractor = get_entity_extractor()
+        chunks = extract_from_chunks(extractor, chunks)
+    else:
+        for chunk in chunks:
+            chunk["entities"] = []
 
-    #  detect contradictions
-    nli = get_nli_model()
-    contradictions = detect_contradictions(nli, chunks)
+    if reasoning_cfg.get("enable_contradictions", True):
+        nli = get_nli_model()
+        contradictions = detect_contradictions(nli, chunks)
+    else:
+        contradictions = []
 
     # compute confidence
     confidence = compute_confidence(chunks, contradictions)

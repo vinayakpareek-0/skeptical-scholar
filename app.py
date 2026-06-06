@@ -11,6 +11,8 @@ def format_response(result):
         response += f"**Reason:** {result['reason']}\n\n"
         if result.get("explanation"):
             response += f"{result['explanation']}"
+        if result.get("timings"):
+            response += f"\n\n---\n\n**Latency:** {result['timings']['total']:.2f}s"
         return response
 
     conf = result["confidence"]["score"]
@@ -19,12 +21,18 @@ def format_response(result):
 
     response = result["answer"] + "\n\n---\n\n"
     response += f"**Confidence:** {conf:.3f}\n\n"
-    response += f"**NLI Verification:** {nli['supported']*100:.0f}% supported, {nli['contradicted']*100:.0f}% contradicted\n\n"
+    if nli.get("skipped"):
+        response += "**NLI Verification:** skipped in fast demo mode\n\n"
+    else:
+        response += f"**NLI Verification:** {nli['supported']*100:.0f}% supported, {nli['contradicted']*100:.0f}% contradicted\n\n"
 
     if citations:
         response += "**Sources:**\n"
         for c in citations:
             response += f"- `{c['paper_id']}` ({c['section']})\n"
+
+    if result.get("timings"):
+        response += f"\n**Latency:** {result['timings']['total']:.2f}s\n"
 
     return response
 
