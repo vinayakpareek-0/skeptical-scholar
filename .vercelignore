@@ -1,4 +1,7 @@
 *
+!package.json
+!scripts/
+!scripts/**
 !web/
 !web/**
 !vercel.json
