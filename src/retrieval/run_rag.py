@@ -5,15 +5,15 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from config import load_config
+from runtime_cache import get_config, get_reranker
 from retrieval.hybrid_retriever import run_hybrid_retrieval
-from retrieval.reranker import load_reranker, rerank
+from retrieval.reranker import rerank
 from retrieval.idk_trigger import check_retrieval_confidence
 
 # have to add more args for this later
 def run_rag(query):
-    config = load_config()
-    reranker = load_reranker(config["retrieval"]["reranker_name"])
+    config = get_config()
+    reranker = get_reranker()
     threshold = config["retrieval"]["idk_threshold"]
 
     candidates = run_hybrid_retrieval(query, top_k=20)

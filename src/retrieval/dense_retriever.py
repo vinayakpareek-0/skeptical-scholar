@@ -1,5 +1,3 @@
-from sentence_transformers import SentenceTransformer 
-import faiss
 import sys 
 import os
 from pathlib import Path
@@ -9,6 +7,9 @@ from config import load_config , PROJECT_ROOT
 from ingestion.database import init_db, get_all_chunks as load_chunks
 
 def build_dense_index(chunks:list[dict] , model_name:str):
+    from sentence_transformers import SentenceTransformer
+    import faiss
+
     model = SentenceTransformer(model_name)
     texts = [c["text"] for c in chunks]
     embeddings = model.encode(texts , batch_size=32 , show_progress_bar=True , normalize_embeddings=True)
@@ -50,14 +51,20 @@ def search_dense(index , model , query , chunks , top_k=10):
     return results
 
 def save_index(index , path):
+    import faiss
+
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True) 
     faiss.write_index(index , str(path))
 
 def load_index(path):
+    import faiss
+
     return faiss.read_index(str(path))
 
 def load_dense_model(model_name:str):
+    from sentence_transformers import SentenceTransformer
+
     return SentenceTransformer(model_name)
 
 if __name__ == "__main__":

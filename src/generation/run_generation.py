@@ -6,17 +6,18 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from reasoning.run_reasoning import run_reasoning
-from generation.llm_client import load_llm, generate
+from generation.llm_client import generate
 from generation.prompts import build_prompt, build_idk_prompt
-from generation.nli_verifier import load_nli, verify_answer
+from generation.nli_verifier import verify_answer
 from generation.idk_trigger3 import check_generation_confidence
+from runtime_cache import get_llm_client, get_nli_model
 
 
 def run_generation(query):
     reasoning = run_reasoning(query)
 
     if reasoning["status"] == "idk":
-        client = load_llm()
+        client = get_llm_client()
         idk_prompt = build_idk_prompt(query, reasoning["reason"])
         explanation = generate(client, idk_prompt)
         return {
@@ -26,11 +27,11 @@ def run_generation(query):
             "answer": None
         }
 
-    client = load_llm()
+    client = get_llm_client()
     prompt = build_prompt(query, reasoning["chunks"], reasoning["confidence"])
     answer = generate(client, prompt)
 
-    nli = load_nli()
+    nli = get_nli_model()
     nli_result = verify_answer(nli, answer, reasoning["chunks"])
 
     idk3 = check_generation_confidence(answer, nli_result)

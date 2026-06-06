@@ -1,4 +1,3 @@
-from sentence_transformers import CrossEncoder
 import sys 
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -9,6 +8,8 @@ from retrieval.hybrid_retriever import run_hybrid_retrieval
 
 
 def load_reranker(model_name:str):
+    from sentence_transformers import CrossEncoder
+
     model = CrossEncoder(model_name)
     return model 
 

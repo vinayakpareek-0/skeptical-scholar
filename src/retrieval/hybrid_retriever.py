@@ -12,6 +12,7 @@ from config import load_config , PROJECT_ROOT
 from ingestion.database import init_db, get_all_chunks as load_chunks
 from retrieval.dense_retriever import load_index as load_dense_index , load_dense_model
 from retrieval.bm25_retriever import build_bm25_index
+from runtime_cache import get_bm25_index, get_chunks, get_dense_index, get_dense_model
 
 
 def reciprocal_rank_fusion(bm25_results, dense_results, k=60):
@@ -33,9 +34,9 @@ def reciprocal_rank_fusion(bm25_results, dense_results, k=60):
     return [{**item["data"], "score": item["score"]} for item in merged]
 
 def search_hybrid(query , bm25_index , dense_index , model , chunks, top_k=20):
-    bm25_results  = search_bm25(bm25_index  ,query , chunks , top_k =20)
-    dense_results = search_dense(dense_index ,model , query , chunks , top_k=20 )
-    return reciprocal_rank_fusion(bm25_results , dense_results , k=60)
+    bm25_results  = search_bm25(bm25_index  ,query , chunks , top_k =top_k)
+    dense_results = search_dense(dense_index ,model , query , chunks , top_k=top_k )
+    return reciprocal_rank_fusion(bm25_results , dense_results , k=60)[:top_k]
 
 def run_hybrid_retrieval(query , top_k=20): 
     """
@@ -44,12 +45,9 @@ def run_hybrid_retrieval(query , top_k=20):
 
     - optim later, might be slow for repeated calls , due to init_db again and again
     """
-    config = load_config()
-    conn = init_db(PROJECT_ROOT / config["database"]["path"])
-    chunks = load_chunks(conn)
-    bm25_index , chunks  = build_bm25_index(chunks)
-    dense_index = load_dense_index(PROJECT_ROOT / config["dense"]["index_path"])
-    model = load_dense_model(config["dense"]["model_name"])
+    bm25_index , chunks  = get_bm25_index()
+    dense_index = get_dense_index()
+    model = get_dense_model()
     return search_hybrid(query , bm25_index , dense_index , model , chunks , top_k=top_k)
 
 if __name__ == "__main__":

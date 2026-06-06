@@ -1,12 +1,12 @@
-from gliner import GLiNER
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from config import load_config
-from retrieval.run_rag import run_rag
 
 
 def load_extractor():
+    from gliner import GLiNER
+
     config = load_config()
     return GLiNER.from_pretrained(config["entity"]["model_name"])
 
@@ -25,6 +25,8 @@ def extract_from_chunks(model, chunks: list[dict]) -> list[dict]:
     return chunks
 
 if __name__ == "__main__":
+    from retrieval.run_rag import run_rag
+
     results = run_rag("vision transformers robustness")
     if not results:
         print("No results to extract entities")

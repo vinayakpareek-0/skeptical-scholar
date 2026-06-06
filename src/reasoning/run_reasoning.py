@@ -6,10 +6,11 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from retrieval.run_rag import run_rag
 from reasoning.chunk_classify import classify_chunks
-from reasoning.entity_extract import load_extractor, extract_from_chunks
-from reasoning.contradiction_detect import load_nli_model, detect_contradictions
+from reasoning.entity_extract import extract_from_chunks
+from reasoning.contradiction_detect import detect_contradictions
 from reasoning.confidence_score import compute_confidence
 from reasoning.idk_trigger_2 import check_reasoning_confidence
+from runtime_cache import get_entity_extractor, get_nli_model
 
 
 def run_reasoning(query):
@@ -22,11 +23,11 @@ def run_reasoning(query):
     chunks = classify_chunks(chunks, method="heuristic")
 
     # extract entities
-    extractor = load_extractor()
+    extractor = get_entity_extractor()
     chunks = extract_from_chunks(extractor, chunks)
 
     #  detect contradictions
-    nli = load_nli_model()
+    nli = get_nli_model()
     contradictions = detect_contradictions(nli, chunks)
 
     # compute confidence

@@ -2,7 +2,6 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from retrieval.run_rag import run_rag
-from transformers import pipeline
 
 
 def classify_chunk_heuristic(chunk):
@@ -37,6 +36,8 @@ def classify_chunk_heuristic(chunk):
     return "background"
 
 def load_zero_shot_classifier():
+    from transformers import pipeline
+
     return pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
 
 def classify_chunk_zeroshot(classifier, chunk):
