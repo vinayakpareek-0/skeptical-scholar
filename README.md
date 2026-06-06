@@ -73,6 +73,14 @@ python app.py
 
 The app launches a Gradio chat interface, usually at `http://localhost:7860`.
 
+For the custom demo UI:
+
+```bash
+python ui_server.py
+```
+
+This serves `web/index.html` and the local API at `http://127.0.0.1:8000`.
+
 ## Local Data
 
 The local `data/` directory is ignored by Git. It stores:
@@ -146,6 +154,8 @@ src/reasoning/            Chunk labels, optional entities/NLI, confidence
 src/generation/           Prompting, Groq client, optional NLI verification
 src/evaluation/           Earlier retrieval and generation evaluation files
 hf-space/                 Separate Hugging Face Space deployment copy
+web/                      Static custom demo UI
+ui_server.py              Local static UI server and /api/query endpoint
 ```
 
 ## Main Technologies
@@ -165,7 +175,7 @@ hf-space/                 Separate Hugging Face Space deployment copy
 - First query after startup still loads models and indexes. Later queries are faster because runtime components are cached.
 - Fast demo mode skips some verification checks. It is useful for presentation latency, but it is less strict than the full reasoning pipeline.
 - The Hugging Face deployment copy under `hf-space/` is separate from the root app. Root changes should be mirrored there only when updating that deployment.
-- A future Vercel UI will need a separate backend for the Python RAG pipeline; Vercel's free frontend hosting is not a direct replacement for this Python runtime.
+- A future Vercel UI can deploy the static `web/` frontend, but it still needs a separate backend for the Python RAG pipeline. Vercel's free frontend hosting is not a direct replacement for this local Python runtime.
 
 ## Evaluation Notes
 

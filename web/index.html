@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Skeptical Scholar</title>
+  <style>
+    :root {
+      --bg: #f5f7f8;
+      --panel: #ffffff;
+      --ink: #1b2028;
+      --muted: #68707d;
+      --line: #d9dee5;
+      --accent: #0f766e;
+      --accent-dark: #115e59;
+      --warn: #9a3412;
+      --soft: #eef5f4;
+      --shadow: 0 14px 34px rgba(24, 32, 43, 0.08);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    .shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+    }
+
+    aside {
+      border-right: 1px solid var(--line);
+      background: #fbfcfd;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .brand {
+      display: grid;
+      gap: 4px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.2;
+      font-weight: 750;
+      letter-spacing: 0;
+    }
+
+    .brand span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .status {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .status-row strong {
+      color: var(--ink);
+      font-weight: 650;
+    }
+
+    .examples {
+      display: grid;
+      gap: 8px;
+    }
+
+    .examples h2 {
+      margin: 0 0 4px;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 650;
+      text-transform: uppercase;
+    }
+
+    .example {
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--ink);
+      text-align: left;
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .example:hover {
+      border-color: var(--accent);
+      background: var(--soft);
+    }
+
+    main {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      height: 100vh;
+    }
+
+    header {
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.88);
+      padding: 18px 26px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    header h2 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    .mode {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+    }
+
+    .conversation {
+      overflow: auto;
+      padding: 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .message {
+      max-width: 920px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .message.user {
+      align-self: flex-end;
+      width: min(720px, 92%);
+      box-shadow: none;
+      background: #fdfefe;
+    }
+
+    .message.assistant {
+      align-self: flex-start;
+      width: min(920px, 100%);
+    }
+
+    .message-head {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .message-body {
+      padding: 15px;
+      line-height: 1.55;
+      font-size: 15px;
+      white-space: pre-wrap;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 0 15px 15px;
+    }
+
+    .pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 12px;
+      color: var(--muted);
+      background: #fafbfc;
+    }
+
+    .pill.warn {
+      color: var(--warn);
+      border-color: #fed7aa;
+      background: #fff7ed;
+    }
+
+    .sources {
+      border-top: 1px solid var(--line);
+      padding: 12px 15px 15px;
+      display: grid;
+      gap: 7px;
+    }
+
+    .source {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    form {
+      border-top: 1px solid var(--line);
+      background: #fbfcfd;
+      padding: 18px 26px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+    }
+
+    textarea {
+      width: 100%;
+      resize: none;
+      min-height: 52px;
+      max-height: 150px;
+      padding: 13px 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font: inherit;
+      font-size: 15px;
+      line-height: 1.4;
+      color: var(--ink);
+      background: var(--panel);
+    }
+
+    textarea:focus {
+      outline: 2px solid rgba(15, 118, 110, 0.22);
+      border-color: var(--accent);
+    }
+
+    button.primary {
+      min-width: 108px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--accent);
+      color: white;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0 18px;
+    }
+
+    button.primary:hover {
+      background: var(--accent-dark);
+    }
+
+    button.primary:disabled,
+    textarea:disabled {
+      cursor: not-allowed;
+      opacity: 0.62;
+    }
+
+    @media (max-width: 860px) {
+      .shell {
+        grid-template-columns: 1fr;
+      }
+
+      aside {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      main {
+        height: auto;
+        min-height: 100vh;
+      }
+
+      .conversation {
+        min-height: 55vh;
+        padding: 18px;
+      }
+
+      header,
+      form {
+        padding: 16px 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside>
+      <div class="brand">
+        <h1>Skeptical Scholar</h1>
+        <span>Local scientific RAG</span>
+      </div>
+
+      <div class="status">
+        <div class="status-row"><span>Backend</span><strong id="backendStatus">checking</strong></div>
+        <div class="status-row"><span>Last run</span><strong id="lastLatency">-</strong></div>
+        <div class="status-row"><span>Mode</span><strong>fast demo</strong></div>
+      </div>
+
+      <div class="examples">
+        <h2>Examples</h2>
+        <button class="example" type="button">How does RAG reduce hallucination?</button>
+        <button class="example" type="button">Explain the attention mechanism in transformers</button>
+        <button class="example" type="button">What is chain-of-thought prompting?</button>
+        <button class="example" type="button">What is the best pizza recipe?</button>
+      </div>
+    </aside>
+
+    <main>
+      <header>
+        <h2>Research Chat</h2>
+        <div class="mode"><span class="dot"></span><span id="busyText">ready</span></div>
+      </header>
+
+      <section class="conversation" id="conversation" aria-live="polite"></section>
+
+      <form id="queryForm">
+        <textarea id="queryInput" rows="2" placeholder="Ask about the local paper corpus"></textarea>
+        <button class="primary" id="submitButton" type="submit">Ask</button>
+      </form>
+    </main>
+  </div>
+
+  <script>
+    const apiBase = localStorage.getItem("skepticalApiBase") || "";
+    const conversation = document.querySelector("#conversation");
+    const form = document.querySelector("#queryForm");
+    const input = document.querySelector("#queryInput");
+    const submitButton = document.querySelector("#submitButton");
+    const backendStatus = document.querySelector("#backendStatus");
+    const busyText = document.querySelector("#busyText");
+    const lastLatency = document.querySelector("#lastLatency");
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function addMessage(role, body, options = {}) {
+      const article = document.createElement("article");
+      article.className = `message ${role}`;
+      const title = role === "user" ? "You" : "Skeptical Scholar";
+      article.innerHTML = `
+        <div class="message-head">
+          <strong>${title}</strong>
+          <span>${options.status || ""}</span>
+        </div>
+        <div class="message-body">${escapeHtml(body || "")}</div>
+      `;
+
+      if (options.meta && options.meta.length) {
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        meta.innerHTML = options.meta.map((item) => {
+          const cls = item.warn ? "pill warn" : "pill";
+          return `<span class="${cls}">${escapeHtml(item.label)}</span>`;
+        }).join("");
+        article.appendChild(meta);
+      }
+
+      if (options.sources && options.sources.length) {
+        const sources = document.createElement("div");
+        sources.className = "sources";
+        sources.innerHTML = options.sources.map((source) => (
+          `<div class="source">${escapeHtml(source.paper_id)} (${escapeHtml(source.section)})</div>`
+        )).join("");
+        article.appendChild(sources);
+      }
+
+      conversation.appendChild(article);
+      conversation.scrollTop = conversation.scrollHeight;
+      return article;
+    }
+
+    function setBusy(isBusy) {
+      input.disabled = isBusy;
+      submitButton.disabled = isBusy;
+      busyText.textContent = isBusy ? "running" : "ready";
+    }
+
+    async function checkHealth() {
+      try {
+        const response = await fetch(`${apiBase}/api/health`);
+        backendStatus.textContent = response.ok ? "online" : "error";
+      } catch {
+        backendStatus.textContent = "offline";
+      }
+    }
+
+    async function ask(query) {
+      addMessage("user", query);
+      setBusy(true);
+      const startedAt = performance.now();
+
+      try {
+        const response = await fetch(`${apiBase}/api/query`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query })
+        });
+        const result = await response.json();
+        if (!response.ok) {
+          throw new Error(result.error || "Request failed");
+        }
+
+        const total = result.timings?.total ?? ((performance.now() - startedAt) / 1000);
+        lastLatency.textContent = `${total.toFixed(2)}s`;
+
+        if (result.status === "idk") {
+          addMessage("assistant", result.explanation || result.reason, {
+            status: "idk",
+            meta: [{ label: `Latency ${total.toFixed(2)}s`, warn: false }]
+          });
+          return;
+        }
+
+        const meta = [
+          { label: `Confidence ${Number(result.confidence?.score || 0).toFixed(3)}` },
+          { label: result.nli?.skipped ? "NLI skipped" : `NLI supported ${Math.round((result.nli?.supported || 0) * 100)}%` },
+          { label: `Latency ${total.toFixed(2)}s` }
+        ];
+
+        addMessage("assistant", result.answer, {
+          status: "answered",
+          meta,
+          sources: result.citations || []
+        });
+      } catch (error) {
+        addMessage("assistant", error.message, {
+          status: "error",
+          meta: [{ label: "Backend unavailable", warn: true }]
+        });
+      } finally {
+        setBusy(false);
+        input.focus();
+      }
+    }
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const query = input.value.trim();
+      if (!query) return;
+      input.value = "";
+      ask(query);
+    });
+
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        form.requestSubmit();
+      }
+    });
+
+    document.querySelectorAll(".example").forEach((button) => {
+      button.addEventListener("click", () => {
+        input.value = button.textContent.trim();
+        form.requestSubmit();
+      });
+    });
+
+    checkHealth();
+    input.focus();
+  </script>
+</body>
+</html>
